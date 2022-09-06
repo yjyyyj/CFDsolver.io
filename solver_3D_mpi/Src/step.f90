@@ -74,7 +74,6 @@ subroutine step_euler(q, qc, myscheme)
         resid(3) = resid(3) + s(3,j,k,l)*s(3,j,k,l) 
         resid(4) = resid(4) + s(4,j,k,l)*s(4,j,k,l) 
         resid(5) = resid(5) + s(5,j,k,l)*s(5,j,k,l)                       
-        ! resid(6:ndmax) = resid(6:ndmax) + dot_product(s(6:ndmax,j,k,l),s(6:ndmax,j,k,l))
         resid(6:ndmax) = resid(6:ndmax) + s(6:ndmax,j,k,l)*s(6:ndmax,j,k,l)
       enddo
     enddo
@@ -177,7 +176,6 @@ subroutine step_RK4(q, qc, myscheme)
           resid(3) = resid(3) + s(3,j,k,l)*s(3,j,k,l) 
           resid(4) = resid(4) + s(4,j,k,l)*s(4,j,k,l) 
           resid(5) = resid(5) + s(5,j,k,l)*s(5,j,k,l)                       
-          ! resid(6:ndmax) = resid(6:ndmax) + dot_product(s(6:ndmax,j,k,l),s(6:ndmax,j,k,l))
           resid(6:ndmax) = resid(6:ndmax) + s(6:ndmax,j,k,l)*s(6:ndmax,j,k,l)
         enddo
       enddo
