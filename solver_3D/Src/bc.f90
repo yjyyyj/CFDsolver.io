@@ -101,8 +101,9 @@ subroutine bc(q,fmu)
       q(:,:,:,0) = q(:,:,:,1)
       fmu(:,:,0) = fmu(:,:,1)
       do j = 1, jmax
-        if (xg(j) > 2d0) then
-          q(2:4,j,:,0) = 0d0 ! non-slip
+        if (xg(j) >= 2d0) then
+          ! q(2:4,j,:,0) = 0d0 ! non-slip
+          q(2:4,j,:,0) = -q(2:4,j,:,1) ! non-slip
         endif
       enddo
   end select

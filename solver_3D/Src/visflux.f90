@@ -133,6 +133,13 @@ subroutine visflux_dns(ql, qr, vf, fmu)
   ! diff = 0.01d0
   lamb = 0.0d0
 
+  dux=0d0
+  duy=0d0
+  duz=0d0
+  grad_uj = 0.d0
+  grad_uk = 0.d0
+  grad_ul = 0.d0
+
   !** loop start ****
   n = 1 
   dl(:)=0
@@ -140,44 +147,11 @@ subroutine visflux_dns(ql, qr, vf, fmu)
 
   do l=1,lmax
     do k=1,kmax
-      ! for boundary treatment @ j=0
-
-      j=0
-      dux(1) = qr(2,j+1,k,l,n) - ql(2,j,k,l,n)
-      dux(2) = qr(3,j+1,k,l,n) - ql(3,j,k,l,n)
-      dux(3) = qr(4,j+1,k,l,n) - ql(4,j,k,l,n)
-      duy(1) = qr(2,j,k+1,l,n) - ql(2,j,k-1,l,n)
-      duy(2) = qr(3,j,k+1,l,n) - ql(3,j,k-1,l,n)
-      duy(3) = qr(4,j,k+1,l,n) - ql(4,j,k-1,l,n)
-      duz(1) = qr(2,j,k,l+1,n) - ql(2,j,k,l-1,n)
-      duz(2) = qr(3,j,k,l+1,n) - ql(3,j,k,l-1,n)
-      duz(3) = qr(4,j,k,l+1,n) - ql(4,j,k,l-1,n)
-
-      grad_uj(j,:,1) = 0.5d0*dux(:) * int(1-dl(n))
-      grad_uj(j,:,2) = 0.5d0*duy(:) * int(1-dl(n))
-      grad_uj(j,:,3) = 0.5d0*duz(:) * int(1-dl(n))
-
-      ! for boundary treatment @ j=jmax+1
-      j=jmax+1
-      dux(1) = qr(2,j,k,l,n) - ql(2,j-1,k,l,n)
-      dux(2) = qr(3,j,k,l,n) - ql(3,j-1,k,l,n)
-      dux(3) = qr(4,j,k,l,n) - ql(4,j-1,k,l,n)
-      duy(1) = qr(2,j,k+1,l,n) - ql(2,j,k-1,l,n)
-      duy(2) = qr(3,j,k+1,l,n) - ql(3,j,k-1,l,n)
-      duy(3) = qr(4,j,k+1,l,n) - ql(4,j,k-1,l,n)
-      duz(1) = qr(2,j,k,l+1,n) - ql(2,j,k,l-1,n)
-      duz(2) = qr(3,j,k,l+1,n) - ql(3,j,k,l-1,n)
-      duz(3) = qr(4,j,k,l+1,n) - ql(4,j,k,l-1,n)
-
-      grad_uj(j,:,1) = 0.5d0*dux(:) * int(1-dl(n))
-      grad_uj(j,:,2) = 0.5d0*duy(:) * int(1-dl(n))
-      grad_uj(j,:,3) = 0.5d0*duz(:) * int(1-dl(n))
-
       do j=1,jmax
         ! half of gradients (u,v,w,c2) of non-horizontal 
-        dux(1) = qr(2,j+1,k,l,n) - ql(2,j-1,k,l,n)
-        dux(2) = qr(3,j+1,k,l,n) - ql(3,j-1,k,l,n)
-        dux(3) = qr(4,j+1,k,l,n) - ql(4,j-1,k,l,n)
+        ! dux(1) = qr(2,j+1,k,l,n) - ql(2,j-1,k,l,n)
+        ! dux(2) = qr(3,j+1,k,l,n) - ql(3,j-1,k,l,n)
+        ! dux(3) = qr(4,j+1,k,l,n) - ql(4,j-1,k,l,n)
         duy(1) = qr(2,j,k+1,l,n) - ql(2,j,k-1,l,n)
         duy(2) = qr(3,j,k+1,l,n) - ql(3,j,k-1,l,n)
         duy(3) = qr(4,j,k+1,l,n) - ql(4,j,k-1,l,n)
@@ -185,9 +159,9 @@ subroutine visflux_dns(ql, qr, vf, fmu)
         duz(2) = qr(3,j,k,l+1,n) - ql(3,j,k,l-1,n)
         duz(3) = qr(4,j,k,l+1,n) - ql(4,j,k,l-1,n)
 
-        grad_uj(j,:,1) = 0.5d0*dux(:) * int(1-dl(n))
-        grad_uj(j,:,2) = 0.5d0*duy(:) * int(1-dl(n))
-        grad_uj(j,:,3) = 0.5d0*duz(:) * int(1-dl(n))
+        grad_uj(j,:,1) = 0.5d0*dux(:) * int(1-dl(1))
+        grad_uj(j,:,2) = 0.5d0*duy(:) * int(1-dl(2))
+        grad_uj(j,:,3) = 0.5d0*duz(:) * int(1-dl(3))
       enddo 
       !
       do j=0,jmax
@@ -299,53 +273,21 @@ subroutine visflux_dns(ql, qr, vf, fmu)
 
   do l=1,lmax
     do j=1,jmax
-      ! for boundary treatment @ k=0
-      k=0
-      dux(1) = qr(2,j+1,k,l,n) - ql(2,j-1,k,l,n)
-      dux(2) = qr(3,j+1,k,l,n) - ql(3,j-1,k,l,n)
-      dux(3) = qr(4,j+1,k,l,n) - ql(4,j-1,k,l,n)
-      duy(1) = qr(2,j,k+1,l,n) - ql(2,j,k,l,n)
-      duy(2) = qr(3,j,k+1,l,n) - ql(3,j,k,l,n)
-      duy(3) = qr(4,j,k+1,l,n) - ql(4,j,k,l,n)
-      duz(1) = qr(2,j,k,l+1,n) - ql(2,j,k,l-1,n)
-      duz(2) = qr(3,j,k,l+1,n) - ql(3,j,k,l-1,n)
-      duz(3) = qr(4,j,k,l+1,n) - ql(4,j,k,l-1,n)
-
-      grad_uk(k,:,1) = 0.5d0*dux(:) * int(1-dl(n))
-      grad_uk(k,:,2) = 0.5d0*duy(:) * int(1-dl(n))
-      grad_uk(k,:,3) = 0.5d0*duz(:) * int(1-dl(n))
-      
-      ! for boundary treatment @ k=kmax+1
-      k=kmax+1
-      dux(1) = qr(2,j+1,k,l,n) - ql(2,j-1,k,l,n)
-      dux(2) = qr(3,j+1,k,l,n) - ql(3,j-1,k,l,n)
-      dux(3) = qr(4,j+1,k,l,n) - ql(4,j-1,k,l,n)
-      duy(1) = qr(2,j,k,l,n) - ql(2,j,k-1,l,n)
-      duy(2) = qr(3,j,k,l,n) - ql(3,j,k-1,l,n)
-      duy(3) = qr(4,j,k,l,n) - ql(4,j,k-1,l,n)
-      duz(1) = qr(2,j,k,l+1,n) - ql(2,j,k,l-1,n)
-      duz(2) = qr(3,j,k,l+1,n) - ql(3,j,k,l-1,n)
-      duz(3) = qr(4,j,k,l+1,n) - ql(4,j,k,l-1,n)
-
-      grad_uk(k,:,1) = 0.5d0*dux(:) * int(1-dl(n))
-      grad_uk(k,:,2) = 0.5d0*duy(:) * int(1-dl(n))
-      grad_uk(k,:,3) = 0.5d0*duz(:) * int(1-dl(n))
-
-      do k=1,kmax
+      do k=0,kmax+1
         ! half of gradients (u,v,w,c2) of non-horizontal 
         dux(1) = qr(2,j+1,k,l,n) - ql(2,j-1,k,l,n)
         dux(2) = qr(3,j+1,k,l,n) - ql(3,j-1,k,l,n)
         dux(3) = qr(4,j+1,k,l,n) - ql(4,j-1,k,l,n)
-        duy(1) = qr(2,j,k+1,l,n) - ql(2,j,k-1,l,n)
-        duy(2) = qr(3,j,k+1,l,n) - ql(3,j,k-1,l,n)
-        duy(3) = qr(4,j,k+1,l,n) - ql(4,j,k-1,l,n)
+        ! duy(1) = qr(2,j,k+1,l,n) - ql(2,j,k-1,l,n)
+        ! duy(2) = qr(3,j,k+1,l,n) - ql(3,j,k-1,l,n)
+        ! duy(3) = qr(4,j,k+1,l,n) - ql(4,j,k-1,l,n)
         duz(1) = qr(2,j,k,l+1,n) - ql(2,j,k,l-1,n)
         duz(2) = qr(3,j,k,l+1,n) - ql(3,j,k,l-1,n)
         duz(3) = qr(4,j,k,l+1,n) - ql(4,j,k,l-1,n)
 
-        grad_uk(k,:,1) = 0.5d0*dux(:) * int(1-dl(n))
-        grad_uk(k,:,2) = 0.5d0*duy(:) * int(1-dl(n))
-        grad_uk(k,:,3) = 0.5d0*duz(:) * int(1-dl(n))
+        grad_uk(k,:,1) = 0.5d0*dux(:) * int(1-dl(1))
+        grad_uk(k,:,2) = 0.5d0*duy(:) * int(1-dl(2))
+        grad_uk(k,:,3) = 0.5d0*duz(:) * int(1-dl(3))
       enddo 
       !
       do k=0,kmax
@@ -451,39 +393,7 @@ subroutine visflux_dns(ql, qr, vf, fmu)
 
   do k=1,kmax
     do j=1,jmax
-      ! for boundary treatment @ l=0
-      l=0
-      dux(1) = qr(2,j+1,k,l,n) - ql(2,j-1,k,l,n)
-      dux(2) = qr(3,j+1,k,l,n) - ql(3,j-1,k,l,n)
-      dux(3) = qr(4,j+1,k,l,n) - ql(4,j-1,k,l,n)
-      duy(1) = qr(2,j,k+1,l,n) - ql(2,j,k-1,l,n)
-      duy(2) = qr(3,j,k+1,l,n) - ql(3,j,k-1,l,n)
-      duy(3) = qr(4,j,k+1,l,n) - ql(4,j,k-1,l,n)
-      duz(1) = qr(2,j,k,l+1,n) - ql(2,j,k,l,n)
-      duz(2) = qr(3,j,k,l+1,n) - ql(3,j,k,l,n)
-      duz(3) = qr(4,j,k,l+1,n) - ql(4,j,k,l,n)
-
-      grad_ul(l,:,1) = 0.5d0*dux(:) * abs(1-dl(n))
-      grad_ul(l,:,2) = 0.5d0*duy(:) * abs(1-dl(n))
-      grad_ul(l,:,3) = 0.5d0*duz(:) * abs(1-dl(n))
-
-      ! for boundary treatment @ l=lmax+1
-      l=lmax+1
-      dux(1) = qr(2,j+1,k,l,n) - ql(2,j-1,k,l,n)
-      dux(2) = qr(3,j+1,k,l,n) - ql(3,j-1,k,l,n)
-      dux(3) = qr(4,j+1,k,l,n) - ql(4,j-1,k,l,n)
-      duy(1) = qr(2,j,k+1,l,n) - ql(2,j,k-1,l,n)
-      duy(2) = qr(3,j,k+1,l,n) - ql(3,j,k-1,l,n)
-      duy(3) = qr(4,j,k+1,l,n) - ql(4,j,k-1,l,n)
-      duz(1) = qr(2,j,k,l,n) - ql(2,j,k,l-1,n)
-      duz(2) = qr(3,j,k,l,n) - ql(3,j,k,l-1,n)
-      duz(3) = qr(4,j,k,l,n) - ql(4,j,k,l-1,n)
-
-      grad_ul(l,:,1) = 0.5d0*dux(:) * abs(1-dl(n))
-      grad_ul(l,:,2) = 0.5d0*duy(:) * abs(1-dl(n))
-      grad_ul(l,:,3) = 0.5d0*duz(:) * abs(1-dl(n))
-
-      do l=1,lmax
+      do l=0,lmax+1
         ! half of gradients (u,v,w,c2) of non-horizontal 
         dux(1) = qr(2,j+1,k,l,n) - ql(2,j-1,k,l,n)
         dux(2) = qr(3,j+1,k,l,n) - ql(3,j-1,k,l,n)
@@ -491,13 +401,13 @@ subroutine visflux_dns(ql, qr, vf, fmu)
         duy(1) = qr(2,j,k+1,l,n) - ql(2,j,k-1,l,n)
         duy(2) = qr(3,j,k+1,l,n) - ql(3,j,k-1,l,n)
         duy(3) = qr(4,j,k+1,l,n) - ql(4,j,k-1,l,n)
-        duz(1) = qr(2,j,k,l+1,n) - ql(2,j,k,l-1,n)
-        duz(2) = qr(3,j,k,l+1,n) - ql(3,j,k,l-1,n)
-        duz(3) = qr(4,j,k,l+1,n) - ql(4,j,k,l-1,n)
+        ! duz(1) = qr(2,j,k,l+1,n) - ql(2,j,k,l-1,n)
+        ! duz(2) = qr(3,j,k,l+1,n) - ql(3,j,k,l-1,n)
+        ! duz(3) = qr(4,j,k,l+1,n) - ql(4,j,k,l-1,n)
 
-        grad_ul(l,:,1) = 0.5d0*dux(:) * abs(1-dl(n))
-        grad_ul(l,:,2) = 0.5d0*duy(:) * abs(1-dl(n))
-        grad_ul(l,:,3) = 0.5d0*duz(:) * abs(1-dl(n))
+        grad_ul(l,:,1) = 0.5d0*dux(:) * abs(1-dl(1))
+        grad_ul(l,:,2) = 0.5d0*duy(:) * abs(1-dl(2))
+        grad_ul(l,:,3) = 0.5d0*duz(:) * abs(1-dl(3))
       enddo 
       !
       do l=0,lmax
@@ -593,6 +503,13 @@ subroutine visflux_dns(ql, qr, vf, fmu)
         vf(4,j,k,l,n) = tau(3) + j_fl_sum *u_fl(3)
         vf(5,j,k,l,n) = tau_u + qheat + sum(hjbar(:)) +j_fl_sum*kbar
         vf(6:ndmax,j,k,l,n) = j_fl(:)
+
+        ! if(l==1 .and. k==2) then
+        ! if(k==2) then
+          ! write(*,fmt='(9E24.15e3)',advance='No') grad_ul(l,:,:)
+          ! write(*,fmt='(8E24.15e3)',advance='No') vf(2:4,j,k,l,n)
+          ! write(*,*)
+        ! endif
       end do
     end do
   end do

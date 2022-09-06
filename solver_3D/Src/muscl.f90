@@ -42,7 +42,7 @@ subroutine muscl_va(q, ql, qr)
   ! dkp = 1.0d0/3.0d0 ! 3rd order upwind
   ! dkp = 1.0d0  ! 2nd order central
   dkp = -1d0
-  eps = 1.0d-6
+  eps = 1.0d-12
 
   do nd=1,ndim  
     do l=0,lmax+1  

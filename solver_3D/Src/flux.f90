@@ -21,6 +21,7 @@ contains
     do n=1,ndim
       dl(:)=0
       dl(n)=1
+      
       do l=0,lmax
         do k=0,kmax
           do j=0,jmax

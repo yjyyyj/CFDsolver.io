@@ -29,7 +29,7 @@ subroutine init(q, q0, qc)
 
   dx(1) = (x1 - x0)/ (jmax-1)
   dx(2) = (y1 - y0)/ (kmax-1)
-  dx(3) = (z1 - z0)/ (lmax-1)
+  dx(3) = (z1 - z0)/ (lmax-1) 
 
   write(*,*) "dx  : ", dx(1)
   write(*,*) "dy  : ", dx(2)
@@ -44,7 +44,7 @@ subroutine init(q, q0, qc)
     yg(k) = dble(k-1)*dx(2)
   end do
   do l=1,lmax
-    zg(l) = dble(l-1)*dx(3)
+    zg(l) = dble(l-1)*dx(3) + 0.5d0*dx(3)
   end do
 
   !*** set inital flow ********************
