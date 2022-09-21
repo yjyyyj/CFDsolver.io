@@ -10,9 +10,8 @@ from matplotlib.ticker import FuncFormatter
 
 
 fname1 = "output_000000.dat"
-fname1 = "output_005000.dat"
-fname1 = "output_010000.dat"
-# fname1 = "output_060000.dat"
+# fname1 = "output_200000.dat"
+fname1 = "output_040000.dat"
 # fname1 = "output_130000.dat"
 fname2 = "ref.dat"
 
@@ -71,13 +70,13 @@ u_uinf = np.array(q2).T[xpoint][:]/uinf
 d_thry = 5.3*np.sqrt(xat)/np.sqrt(Rex/uinf)
 print("delta_thy : ",d_thry)
 
-# for i in range(len(x2)):
-#     if (u_uinf[i]>0.995) : 
-#         scale = i
-#         break
+for i in range(len(x2)):
+    if (u_uinf[i]>0.995) : 
+        scale = i
+        break
 
-scale = np.argmax(u_uinf)
-d_calc = x2[scale]
+# scale = np.argmax(u_uinf)
+d_calc = x2[scale+2]
 print("delta_cal : ",d_calc)
 
 #****** read reference solusion ************
@@ -85,11 +84,15 @@ data2=(np.loadtxt(fname2,dtype="float",skiprows=0)).T
 
 d_ref = 5.32
 eta2  = data2[0]   # eta
-y     = data2[1]*(d_calc/d_ref) # fiten y with delta point
+y     = data2[1]*(d_thry/d_ref) # fiten y with delta point
+# y     = data2[1]/d_thry  # fiten y with delta point
 ref_u = data2[2]  # u
 
 x2 = x2/d_calc
-y  = y /d_calc
+# y  = y /d_calc
+
+# x2 = x2/d_thry
+y  = y /d_thry
 
 # # *** 2D slice ****************************
 fig.set_size_inches([10, 8])
@@ -97,10 +100,12 @@ fig.set_size_inches([10, 8])
 plt.grid(False)
 plt.xlabel(r'$u/U$',fontsize=22,y=0)
 plt.ylabel(r"$y/\delta$",fontsize=22)
+# plt.ylabel(r"$y$",fontsize=22)
 
 plt.plot(u_one, x2, linewidth=1, color="gray", linestyle="dashed",zorder=1)
 
 plt.ylim(0,2)
+# plt.ylim(0,1)
 plt.plot(u_uinf, x2, linewidth=2, color="red", linestyle="solid",zorder=1)
 plt.plot(ref_u, y, linewidth=2, color="black", linestyle="solid",zorder=1)
 
@@ -122,17 +127,19 @@ nmax = x1.shape[0]
 
 # plt.title("Plot 2D array")
 plt.xlabel(r'$x$',fontsize=22)
-plt.ylabel(r"$y/\delta$",fontsize=22)
+# plt.ylabel(r"$y/\delta$",fontsize=22)
 # plt.xticks(np.arange(0,1.2,0.2))
 
 xx, yy = np.meshgrid(x1, x2)
-cf = plt.contourf(xx, yy, q1, cmap="jet")
-cf = plt.contourf(xx, yy, q2, cmap="jet")
+cf = plt.contourf(xx, yy, q1, cmap="jet",levels=10)
+cf = plt.contourf(xx, yy, q2, cmap="jet",levels=10)
 # cf = plt.contourf(xx, yy, q3, cmap="jet")
 # cf = plt.contourf(xx, yy, q4, cmap="jet")
 # cf = plt.contourf(xx, yy, q5, cmap="jet",levels=36)
 # cf = plt.contourf(xx, yy, q6, cmap="jet")
 # plt.plot(x2,fd)
+# plt.plot(x1, 5.3*np.sqrt(x1-2)/np.sqrt(Rex/uinf)/d_thry, linewidth=2, color="black", linestyle="solid",zorder=1)
+
 
 cb = plt.colorbar(cf)
 cb.set_label(r'$u$',fontsize=22,y=1,x=1.2,rotation=0)

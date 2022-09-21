@@ -11,7 +11,7 @@ FFLAGS =-fconvert=little-endian  -frecord-marker=${MARK} ${LDFLAGS} ${OPT}
 
 # FFLAGS2=${FFLAGS}
 
-OBJS = module.o flux.o scheme.o main.o init.o outf.o bc.o sumdf.o muscl.o step.o visflux.o
+OBJS = module.o flux.o scheme.o main.o init.o outf.o bc.o sumdf.o muscl.o step.o visflux.o read_data.o
 PROGRAM = ../job.out
 
 all:	$(OBJS)

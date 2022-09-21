@@ -21,11 +21,11 @@ contains
     do n=1,ndim
       dl(:)=0
       dl(n)=1
-      ! $omp parallel do default(none) &
-      ! $OMP & firstprivate(dl,n) &
-      ! $OMP & shared(f, ql, qr,jmax,kmax,lmax) &
-      ! $OMP & private(r1,r2,p1,p2,k1,k2,e1,e2,m1,m2,g1,g2) & 
-      ! $OMP & private(ry1,ry2,u1,u2) 
+      !$omp parallel do default(none) &
+      !$OMP & firstprivate(dl,n) &
+      !$OMP & shared(f, ql, qr,jmax,kmax,lmax,ndmax) &
+      !$OMP & private(r1,r2,p1,p2,k1,k2,e1,e2,m1,m2,g1,g2) & 
+      !$OMP & private(ry1,ry2,u1,u2) 
       do l=0,lmax
         do k=0,kmax
           do j=0,jmax
@@ -92,11 +92,11 @@ contains
     do n=1,ndim
       dl(:)=0
       dl(n)=1
-      ! $omp parallel do default(none) &
-      ! $OMP & firstprivate(dl,n) &
-      ! $OMP & shared(f, ql, qr,jmax,kmax,lmax) &
-      ! $OMP & private(r1,r2,p1,p2,k1,k2,e1,e2,m1,m2,g1,g2,c1,c2,A) & 
-      ! $OMP & private(ry1,ry2,u1,u2) 
+      !$omp parallel do default(none) &
+      !$OMP & firstprivate(dl,n) &
+      !$OMP & shared(f, ql, qr,jmax,kmax,lmax,ndmax) &
+      !$OMP & private(r1,r2,p1,p2,k1,k2,e1,e2,m1,m2,g1,g2,c1,c2,A) & 
+      !$OMP & private(ry1,ry2,u1,u2) 
       do l=0,lmax
         do k=0,kmax
           do j=0,jmax
@@ -157,24 +157,23 @@ contains
     double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f
     double precision,dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1),ndim) :: ql, qr
     double precision r1,r2,p1,p2,k1,k2,e1,e2
-    double precision m1,m2,g1,g2,c1,c2
+    double precision m1,m2,g1,g2,c1,c2,h1,h2
     double precision,dimension(nspecies) :: ry1, ry2
     double precision,dimension(ndim) :: u1,u2,ut
-    integer,dimension(ndim) :: dl
-    double precision h1, h2, uvw2
-    double precision ct,ht,gt
+    double precision uvw2,ct,ht,gt
     double precision,dimension(ndmax,ndmax) :: A, R, RInv
     double precision,dimension(ndmax) :: tmp
+    integer,dimension(ndim) :: dl
 
     do n=1,ndim
       dl(:)=0
       dl(n)=1
-      ! $omp parallel do default(none) &
-      ! $OMP & firstprivate(dl,n) &
-      ! $OMP & shared(f, ql, qr,jmax,kmax,lmax) &
-      ! $OMP & private(r1,r2,p1,p2,k1,k2,e1,e2,m1,m2,g1,g2,c1,c2) & 
-      ! $OMP & private(ry1,ry2,u1,u2,h1,h2,uvw2,ut,ct,ht,gt) & 
-      ! $OMP & private(A, R, RInv,tmp) 
+      !$omp parallel do default(none) &
+      !$OMP & firstprivate(dl,n) &
+      !$OMP & shared(f, ql, qr,jmax,kmax,lmax,ndmax) &
+      !$OMP & private(r1,r2,p1,p2,k1,k2,e1,e2,m1,m2,g1,g2,c1,c2,h1,h2) & 
+      !$OMP & private(ry1,ry2,u1,u2,ut,uvw2,ct,ht,gt) &
+      !$OMP & private(A, R, RInv,tmp) 
       do l=0,lmax
         do k=0,kmax
           do j=0,jmax
@@ -268,18 +267,18 @@ contains
     double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f
     double precision,dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1),ndim) :: ql, qr
     double precision r1,r2,p1,p2,k1,k2,e1,e2
-    double precision m1,m2,g1,g2,c1,c2
+    double precision m1,m2,g1,g2,c1,c2,h1,h2
     double precision,dimension(nspecies) :: ry1, ry2
     double precision,dimension(ndim) :: u1,u2
-    integer,dimension(ndim) :: dl
-    double precision h1, h2
     double precision,dimension(ndim) :: ulm1,ulm2
     double precision xmach1,xmach2,zz,uvw21,uvw22
     double precision cbv,xm1,xm2,temp,xmh,chi,sw1,sw2,bt1,bt2,pt
     double precision g,unb,un_p,un_m,fm,fmp,fmm
+    double precision,dimension(nspecies) ::fmy,fmyp,fmym
+    integer,dimension(ndim) :: dl
     integer :: nthon
 
-    nthon = 1
+    ! nthon = 1
 
     do n=1,ndim
       dl(:)=0
@@ -291,7 +290,8 @@ contains
       !$OMP & private(r1,r2,p1,p2,k1,k2,e1,e2,m1,m2,g1,g2,c1,c2,h1,h2) & 
       !$OMP & private(ry1,ry2,u1,u2,ulm1,ulm2) &
       !$OMP & private(xmach1,xmach2,zz,uvw21,uvw22,cbv,xm1,xm2,temp,xmh,chi) &
-      !$OMP & private(sw1,sw2,bt1,bt2,pt,g,unb,un_p,un_m,fm,fmp,fmm) 
+      !$OMP & private(sw1,sw2,bt1,bt2,pt,g,unb,un_p,un_m,fm,fmp,fmm) &
+      !$OMP & private(fmy,fmyp,fmym) 
       do l=0,lmax
         do k=0,kmax
           do j=0,jmax
@@ -362,15 +362,27 @@ contains
         
             pt  = 0.5d0*( (p1+p2)+(bt1-bt2)*(p1-p2) + (p1+p2)*(1.0d0-chi)*(bt1 + bt2-1.0d0))
             
-            !**** set xm_dot(fm)
+            !**** set xm_dot(fm) for rYi
             g    = -max(min(xm1,0.0d0),-1.0d0)*min(max(xm2,0.0d0),1.0d0)
             unb  = (r1*abs(u1(n)) + r2*abs(u2(n)))/(r1+r2)
             un_p = (1.0d0-g)*unb + g*abs(u1(n))
             un_m = (1.0d0-g)*unb + g*abs(u2(n))
-            fm   = 0.5d0*(r1*(u1(n) + un_p) + r2*(u2(n) - un_m) - chi*(p2 - p1)*cbv  )
+            ! construct fm with rYi
+            fmy(:)   = 0.5d0*(ry1(:)*(u1(n) + un_p) + ry2(:)*(u2(n) - un_m) - chi*(p2 - p1)*cbv  )
+            fmyp(:)  = 0.5d0*( fmy(:) + abs(fmy(:)) )
+            fmym(:)  = 0.5d0*( fmy(:) - abs(fmy(:)) )
+            fm   = sum(fmy(:))
             fmp  = 0.5d0*( fm + abs(fm) )
             fmm  = 0.5d0*( fm - abs(fm) )
-            
+
+            !**** set xm_dot(fm) for single-species
+            ! unb  = (r1*abs(u1(n)) + r2*abs(u2(n)))/(r1+r2)
+            ! un_p = (1.0d0-g)*unb + g*abs(u1(n))
+            ! un_m = (1.0d0-g)*unb + g*abs(u2(n))
+            ! fm   = 0.5d0*(r1*(u1(n) + un_p) + r2*(u2(n) - un_m) - chi*(p2 - p1)*cbv  )
+            ! fmp  = 0.5d0*( fm + abs(fm) )
+            ! fmm  = 0.5d0*( fm - abs(fm) )
+
             !**** numerical flux (p:plus m:minus)
             ! flux
             f(1,j,k,l,n) = 0d0
@@ -378,7 +390,7 @@ contains
             f(3,j,k,l,n) = (fmp*u1(2) + fmm*u2(2) + pt*dl(2))
             f(4,j,k,l,n) = (fmp*u1(3) + fmm*u2(3) + pt*dl(3))
             f(5,j,k,l,n) = (fmp*h1    + fmm*h2          )
-            f(6,j,k,l,n) = ( fmp       + fmm            )
+            f(6:ndmax,j,k,l,n) = (fmyp(:)      + fmym(:)            )
           end do
         end do
       end do
@@ -407,6 +419,12 @@ contains
     do n=1,ndim
       dl(:)=0
       dl(n)=1
+      !$omp parallel do default(none) &
+      !$OMP & firstprivate(dl,n) &
+      !$OMP & shared(f, ql, qr,jmax,kmax,lmax,ndmax) &
+      !$OMP & private(r1,r2,p1,p2,m1,m2,g1,g2,c1,c2) & 
+      !$OMP & private(ry1,ry2,u1,u2) &
+      !$OMP & private(r_fl,cbar,pibar,kbar,ibar,pbar,ry_fl,cybar,u_fl,mubar) 
       do l=0,lmax
         do k=0,kmax
           do j=0,jmax
@@ -485,6 +503,12 @@ contains
     do n=1,ndim
       dl(:)=0
       dl(n)=1
+      !$omp parallel do default(none) &
+      !$OMP & firstprivate(dl,n) &
+      !$OMP & shared(f, ql, qr,jmax,kmax,lmax,ndmax) &
+      !$OMP & private(r1,r2,p1,p2,m1,m2,g1,g2,c1,c2) & 
+      !$OMP & private(ry1,ry2,u1,u2) &
+      !$OMP & private(r_fl,cbar,pibar,kbar,ibar,pbar,ry_fl,cybar,u_fl,mubar) 
       do l=0,lmax
         do k=0,kmax
           do j=0,jmax
@@ -563,6 +587,12 @@ contains
     do n=1,ndim
       dl(:)=0
       dl(n)=1
+      !$omp parallel do default(none) &
+      !$OMP & firstprivate(dl,n) &
+      !$OMP & shared(f, ql, qr,jmax,kmax,lmax,ndmax) &
+      !$OMP & private(r1,r2,p1,p2,m1,m2,g1,g2,c1,c2) & 
+      !$OMP & private(ry1,ry2,u1,u2) &
+      !$OMP & private(r_fl,cbar,pibar,kbar,ibar,pbar,ry_fl,cybar,u_fl,mubar) 
       do l=0,lmax
         do k=0,kmax
           do j=0,jmax

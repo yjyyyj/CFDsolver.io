@@ -23,7 +23,9 @@ module param
 
   double precision,allocatable,dimension(:) :: qinf
 
+  integer :: restart
   integer :: nout
+  integer :: nmax
   integer :: ndim
   integer :: ndmax
   integer :: nspecies
@@ -57,9 +59,9 @@ module param
     calmw = 1d0/calmw
   end function 
 
-  double precision function calgm(qc,mw)
+  double precision function calgm(qc,mw_mix)
   double precision,intent(in) :: qc(ndmax)
-  double precision,intent(in) :: mw
+  double precision,intent(in) :: mw_mix
   double precision :: r
   double precision :: ry(nspecies)
   integer i
@@ -69,7 +71,7 @@ module param
 
     calgm = 0d0
     do i = 1, nspecies
-      calgm = calgm + (gami(i)/mwi(i))*mw*ry(i)/r
+      calgm = calgm + (gami(i)/mwi(i))*mw_mix*ry(i)/r
     enddo
   end function
 

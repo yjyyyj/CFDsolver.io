@@ -45,18 +45,6 @@ subroutine muscl_va(q, ql, qr)
   dkp = -1d0
   eps = 1.0d-12
 
-  !$omp parallel do shared(ql,qr,q) collapse(2)
-  do nd=1,ndim  
-    do l=0,lmax+1  
-      do k=0,kmax+1  
-        do j=0,jmax+1  
-          ql(:,j,k,l,nd) = q(:,j,k,l)
-          qr(:,j,k,l,nd) = q(:,j,k,l)
-        enddo
-      enddo
-    enddo
-  enddo
-
   do nd=1,ndim
     dl(:)=0
     dl(nd)=1
@@ -85,6 +73,22 @@ subroutine muscl_va(q, ql, qr)
       enddo 
     enddo 
   enddo 
+
+  !$omp parallel do shared(ql,qr,q) collapse(2)
+  do nd=1,ndim  
+    do l=0,lmax+1  
+      do k=0,kmax+1  
+        do j=0,jmax+1  
+          qr(:,jmax+1,k,l,nd) = qr(:,1   ,k,l,nd)
+          ql(:,0     ,k,l,nd) = ql(:,jmax,k,l,nd)
+          qr(:,j,kmax+1,l,nd) = qr(:,j,1   ,l,nd)
+          ql(:,j,0     ,l,nd) = ql(:,j,kmax,l,nd)
+          qr(:,j,k,lmax+1,nd) = qr(:,j,k,1   ,nd)
+          ql(:,j,k,0     ,nd) = ql(:,j,k,lmax,nd)
+        enddo
+      enddo
+    enddo
+  enddo
 
   return
 end subroutine muscl_va

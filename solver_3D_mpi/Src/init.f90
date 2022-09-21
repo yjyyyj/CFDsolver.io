@@ -1,31 +1,29 @@
-subroutine init(q, q0, qc)
+subroutine init_flow(q, q0, qc)
   !**********************************************************************
   !*     initialize                                                     *
   !**********************************************************************
   use param
   implicit none
   double precision x0,x1,y0,y1,z0,z1
-  double precision uvw2,eps
+  double precision uvw2
   integer j,k,l
   double precision, dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1)) :: q
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0, qc
   
   x0 = 0.0d0
-  ! x1 = 1.0d0
-  ! x1 = 4.0d0
-  x1 = 12.0d0
+  x1 = 1.0d0
+  ! x1 = 12.0d0
 
   y0 = 0.0d0
   y1 = 1.0d0
 
   z0 = 0.0d0
-  ! z1 = 1.0d0
-  z1 = 5d0
+  z1 = 1.0d0
+  ! z1 = 5d0
 
   q = 0.0d0
   q0 = 0.0d0
   qc = 0.0d0
-  sums0 = 0.0d0
 
   dx(1) = (x1 - x0)/ (jmax-1)
   dx(2) = (y1 - y0)/ (kmax-1)
@@ -50,17 +48,21 @@ subroutine init(q, q0, qc)
   !*** set inital flow ********************
 
   ! call contact_init(q0)
-  ! call contact_init_sharp(q0)
+  call contact_init_sharp(q0)
   ! call prin_init(q0)
   ! call multiprin_init(q0)
   ! call flower_init(q0)
-
   ! call sod_init(q0)
   ! call TGV_init(q0)
   ! call RMinstability_init(q0)
-  call Blasius_init(q0)
+  ! call Blasius_init(q0)
   
   ! call nonDimtize(q0)
+  ! ***************************************
+
+  if(restart==1) call read_flow(q0)
+
+  ! ***************************************
 
   q(:,1:jmax,1:kmax,1:lmax) = q0(:,1:jmax,1:kmax,1:lmax)            ! set initial q
 
@@ -82,53 +84,12 @@ subroutine init(q, q0, qc)
     enddo
   enddo
 
-  do l=1,lmax-1
-    do k=1,kmax-1
-      do j=1,jmax-1
-        sums0(1:ndmax) = sums0(1:ndmax) + qc(1:ndmax,j,k,l)
-      enddo
-    enddo
-  enddo
+  call sumdf_init(qc)
+  ! call residual_init()
 
-  ! zero/
-  eps = 1e-10
-  sums0(:) = (sums0(:)+eps)/(jmax-1)/(kmax-1)/(lmax-1) 
-
-  ! open(150,file="sums.dat",form="formatted")
-  !   write(150,fmt='(I8, 9E20.10e3)',advance='No') 0, sums0(:)-sums0(:)
-  ! close(150)
-  open(130,file="residual.dat",form="formatted")
-    write(130,fmt='(I8, 9E20.10e3)',advance='No') 0, sums0(:)-sums0(:)
-  close(130)
-
-  !!!**** out 3d full data ********
-  ! open(500,file="output_000000.dat",form="formatted")
-  !   do l=1,lmax
-  !     do k=1,kmax
-  !       do j=1,jmax
-  !         ! temp = mw0/q0(1,j,k) * q0(4,j,k)/Ru          ! T = (M/r)*(p/R)
-  !         write(500,fmt='(11E25.15e3)',advance='No') xg(j),yg(k),zg(l),q0(1:ndmax,j,k,l),gam(j,k,l)
-  !         write(500,*)
-  !       end do
-  !       write(500,*)
-  !     end do
-  !     write(500,*)
-  !   end do
-  ! close(500)
-
-  !**** out 1d slice data ********
-  open(100,file='output_000000.dat',form="formatted")
-    do l=1,lmax
-      do k=1,kmax
-        do j=1,jmax
-          if( yg(k)==0.5d0 ) then
-            write(100,fmt='(11E25.15e3)',advance='No') xg(j),zg(l),q(1:ndmax,j,k,l),gam(j,k,l)
-            write(100,*)
-          endif
-        end do
-      end do
-    end do
-  close(100)
+  ! call outf_init(q)
+  ! call outf_slice_init(q)
+  call outf_1d_init(q)
 
   write(*,*) "set init"
 
@@ -137,7 +98,7 @@ subroutine init(q, q0, qc)
   !$omp end parallel
 
   return
-end subroutine init
+end subroutine init_flow
 
 subroutine nonDimtize(q0)
   use param
@@ -259,13 +220,20 @@ subroutine contact_init_sharp(q0)
   zc = 0.5d0
   rc = 0.25d0
 
+
   const = 5000d0
   ! const = 50d0
-  ryw(1) = 0.5d0
-  ryw(2) = 0.2d0
-  ! ! *** T=const  *******
+
+  ! *** T= Not const  *******
+  ryw(1) = 0.2d0
+  ryw(2) = 0.7d0
+  Ru = 200d0
+
+  ! *** T=const  *******
   ! ryw(1) = 0.005d0*mwi(1)
   ! ryw(2) = 0.005d0*mwi(2)
+  ! Ru = 190d0
+
 
   ! contact 
   do l=1,lmax
@@ -276,7 +244,7 @@ subroutine contact_init_sharp(q0)
         ry(2) = ryw(2)*(0.5d0*(tanh(const*( r - rc)) + 1d0))
 
         q0(1,j,k,l) = ry(1) + ry(2)     ! rho
-        q0(2,j,k,l) = 0.0d0         ! u
+        q0(2,j,k,l) = 1.0d0         ! u
         q0(3,j,k,l) = 0.0d0         ! v
         q0(4,j,k,l) = 0.0d0         ! w
         q0(5,j,k,l) = 0.9d0         ! p

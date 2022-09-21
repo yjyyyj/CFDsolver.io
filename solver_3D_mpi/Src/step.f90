@@ -126,9 +126,8 @@ subroutine step_RK4(q, qc, myscheme)
     call bc(q,fmu)
     call myscheme%calc_faceQ(q, ql, qr)
     call myscheme%calc_flux(ql, qr, f)
-    call visflux_dns(ql, qr, vf,fmu)
-    ! ここで落ちてる↑
-    ! call dflux(ql, qr, vf)
+    ! call visflux_dns(ql, qr, vf,fmu)
+    call visflux_LAD(ql, qr, vf)
 
     !$omp parallel do shared(q,qc,qcold1,qcold2,f,vf)
     do l=1,lmax

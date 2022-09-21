@@ -1,4 +1,4 @@
-subroutine visflux(ql, qr, vf)
+subroutine visflux_LAD(ql, qr, vf)
   !**********************************************************************
   !*     caluculate right-hand-side                                     *
   !**********************************************************************
@@ -9,32 +9,29 @@ subroutine visflux(ql, qr, vf)
   double precision,dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1),ndim) :: ql, qr
   double precision r1,r2,p1,p2,k1,k2,e1,e2
   double precision m1,m2,g1,g2
-  double precision r_fl,kbar,hjbar
-  double precision,dimension(nspecies) :: ry1,ry2,h1,h2
-  double precision,dimension(nspecies) :: ry_fl,j_fl
-  double precision,dimension(nspecies) :: grad_y1
+  double precision r_fl,pbar,kbar,hjbar
+  double precision,dimension(nspecies) :: ry1,ry2,h1,h2,phi1,phi2
+  double precision,dimension(nspecies) :: rj_fl,j_fl
+  double precision,dimension(nspecies) :: grad_y,diff
   double precision,dimension(ndim) :: u1,u2,u_fl
   integer,dimension(ndim) :: dl
-  double precision diff
 
-  diff = 0.25d0
-  ! diff = 0.01d0
-
+  diff(:) = 0.005d0
+  diff = diff*vflag
 
   do n=1,ndim
     dl(:)=0
     dl(n)=1
+    !$OMP parallel do default(none) &
+    !$OMP & firstprivate(dl,n) &
+    !$OMP & shared(vf,ql,qr,diff,jmax,kmax,lmax,ndmax) &
+    !$OMP & shared(dx,gami,mwi) &
+    !$OMP & private(r1,r2,p1,p2,k1,k2,e1,e2,m1,m2,g1,g2) & 
+    !$OMP & private(r_fl,pbar,kbar,hjbar) & 
+    !$OMP & private(ry1,ry2,h1,h2,phi1,phi2,u1,u2,u_fl,rj_fl,j_fl,grad_y) 
     do l=0,lmax
       do k=0,kmax
         do j=0,jmax
-    ! do l=1,lmax-1
-    !   do k=1,kmax-1
-    !     do j=1,jmax-1
-          ! half of gradients Y_i @ j, j+1
-          ! grad_y1(:) = 0.5d0*(qr(6:ndmax,j+dl(1),k+dl(2),l+dl(3),n)/qr(1,j+dl(1),k+dl(2),l+dl(3),n)  &
-          !                     - ql(6:ndmax,j-dl(1),k-dl(2),l-dl(3),n)/ql(1,j-dl(1),k-dl(2),l-dl(3),n))/dx(n)
-          ! grad_y2(:) = 0.5d0*(qr(6:ndmax,j+2*dl(1),k+2*dl(2),l+2*dl(3),n)/qr(1,j+2*dl(1),k+2*dl(2),l+2*dl(3),n) &
-          !                     - ql(6:ndmax,j,k,l,n)/ql(1,j,k,l,n))/dx(n)
           !****************************************!
           ! left face q
           u1(1)  = ql(2,j,k,l,n)
@@ -43,11 +40,11 @@ subroutine visflux(ql, qr, vf)
           p1     = ql(5,j,k,l,n)
           ry1(:) = ql(6:ndmax,j,k,l,n)
           r1     = sum(ry1(:))
-          k1 = r1*(u1(1)*u1(1)+u1(2)*u1(2)+u1(3)*u1(3))*0.5d0
+          k1 = (u1(1)*u1(1)+u1(2)*u1(2)+u1(3)*u1(3))*0.5d0
           e1 = p1*g1
           m1 = calmw(ql(:,j,k,l,n))
           g1 = calgm(ql(:,j,k,l,n),m1)
-      
+          
           ! right face q
           u2(1)  = qr(2,j+dl(1),k+dl(2),l+dl(3),n)
           u2(2)  = qr(3,j+dl(1),k+dl(2),l+dl(3),n)
@@ -55,49 +52,59 @@ subroutine visflux(ql, qr, vf)
           p2     = qr(5,j+dl(1),k+dl(2),l+dl(3),n)
           ry2(:) = qr(6:ndmax,j+dl(1),k+dl(2),l+dl(3),n)
           r2     = sum(ry2(:))
-          k2 = r2*(u2(1)*u2(1)+u2(2)*u2(2)+u2(3)*u2(3))*0.5d0
+          k2 = (u2(1)*u2(1)+u2(2)*u2(2)+u2(3)*u2(3))*0.5d0
           e2 = p2*g2
           m2 = calmw(qr(:,j+dl(1),k+dl(2),l+dl(3),n))
           g2 = calgm(qr(:,j+dl(1),k+dl(2),l+dl(3),n),m2)  
           
-          ry_fl(:) = 0.5d0*(ry1(:) + ry2(:))
-          r_fl = sum(ry_fl(:))
+          phi1(:) = m1*ry1(:)/r1/mwi(:)
+          phi2(:) = m2*ry2(:)/r2/mwi(:)
+
+          r_fl = 0.5d0*(r1 + r2)
           u_fl(:)=0.5d0*(u1(:) + u2(:))
+          pbar = 0.5d0*(p1 + p2)
           kbar = 0.5d0*(k1 + k2)
           
-          h1(:) = p1*(m1/r1)*(gami(:)/mwi(:) + 1d0/mwi(:))
-          h2(:) = p2*(m2/r2)*(gami(:)/mwi(:) + 1d0/mwi(:))
+          !****** mass diff ********************************* 
+          j_fl(:)  = 0.5d0*diff(:)*(phi2(:) - phi1(:))/dx(n) ! nabla phi_i
+          ! rj_fl(:) = 0.5d0*(r2/m2*mwi(:) + r1/m1*mwi(:))*j_fl(:) ! rho_i|_{j+1/2} j_i|_{j+1/2}
 
-          ! j1(:) = r1*diff*grad_y1(:) - (ry1(:)/r1)*sum(r1*diff*grad_y1(:))
-          ! j2(:) = r2*diff*grad_y2(:) - (ry2(:)/r2)*sum(r2*diff*grad_y2(:))
-          ! j_fl(:) = 0.5d0*(j2(:) + j1(:)) 
-          ! hjbar = sum(0.5d0*(h2(:)*j2(:) + h1(:)*j1(:) ))
+          grad_y(:) = 0.5d0*(ry2(:)/r2 - ry1(:)/r1)/dx(n)  
+          rj_fl(:) = r_fl*diff(:)*grad_y(:) - 0.5d0*(ry2(:)/r2 + ry1(:)/r1)*sum(r_fl*diff*grad_y(:))   
+          ! rj_fl(:) = 0.5d0*(r1+r2) * 0.5d0*diff(:)*(ry2(:)/r2 - ry1(:)/r1)/dx ! rho|_{j+1/2} Y_i|_{j+1/2}
 
-          grad_y1(:) = 0.5d0*(ry2(:)/r2 - ry1(:)/r1)/dx(n)  
-          j_fl(:) = r_fl*diff*grad_y1(:) - 0.5d0*(ry2(:)/r2 + ry1(:)/r1)*sum(r_fl*diff*grad_y1(:))            
-          hjbar = sum(0.5d0*(h2(:) + h1(:)) * j_fl(:))
+          ! rj_fl(:) = 0.5d0*diff(:)*(ry2(:) - ry1(:))/dx(n)   ! nabla rhoY_i
 
-          ! grad_y1(:) = 0.5d0*(m2/r2*r1/m1*ry2(:) - m1/r1*r2/m2*ry1(:))/dx(n)  
-          ! j_fl(:) = diff*grad_y1(:) - 0.5d0*(ry2(:)/r2 + ry1(:)/r1)*sum(diff*grad_y1(:))       
-          ! hjbar = 0.5d0*(p2*g2 - p1*g1)
+          ! rj_fl(:) = 0.5d0*(r2/m2*mwi(:) + r1/m1*mwi(:))*j_fl(:) - 0.5d0*diff(:)*(ry2(:) - ry1(:))/dx(n)  ! rho_i|_{j+1/2} j_i|_{j+1/2} - nabla rhoY_i
 
-          ! hjbar = sum(0.5d0*(p1*(m1/r1)*(gami(:)/mwi(:) - g1/mwi(:)) + p2*(m2/r2)*(gami(:)/mwi(:) - g2/mwi(:)))*j_fl )!** compati
+          r_fl = sum(rj_fl(:))
           
-          vf(1,j,k,l,n) = 0.d0
-          vf(2,j,k,l,n) = sum(j_fl(:))*u_fl(1)
-          vf(3,j,k,l,n) = sum(j_fl(:))*u_fl(2)
-          vf(4,j,k,l,n) = sum(j_fl(:))*u_fl(3)
-          vf(5,j,k,l,n) = sum(j_fl(:))*kbar + hjbar
-          vf(6:ndmax,j,k,l,n) = j_fl(:)
+          !****** enthalpy diff ********************************* 
+          h1(:) = p1*(m1/r1)*(gami(:)/mwi(:) + 1d0/mwi(:)) ! Y_i base
+          h2(:) = p2*(m2/r2)*(gami(:)/mwi(:) + 1d0/mwi(:)) ! Y_i base
+          hjbar = sum(0.5d0*(h2(:) + h1(:)) * rj_fl(:)) ! H_i|_12 = h_i|_12*J_i|_12
 
-          ! if(n==1 .and. k==2 .and. l==2) write(*,*) j, vf(:,j,k,l,n)
+          ! h1(:) = p1*gami(:) + p1 ! phi_i base
+          ! h2(:) = p2*gami(:) + p2 ! phi_i base
+          ! hjbar = sum( 0.5d0*(h2(:) + h1(:))*j_fl(:) ) ! H_i|_12 = rho_i h_i|_12*j_i|_12
+
+          ! hjbar = 0.5d0*pbar*diff(1)*(g2 - g1)/dx(n)
+
+          !****** construct flux ********************************* 
+          vf(1,j,k,l,n) = 0.d0
+          vf(2,j,k,l,n) = sum(rj_fl(:))*u_fl(1)*dl(1)
+          vf(3,j,k,l,n) = sum(rj_fl(:))*u_fl(2)*dl(1)
+          vf(4,j,k,l,n) = sum(rj_fl(:))*u_fl(3)*dl(1)
+          vf(5,j,k,l,n) = sum(rj_fl(:))*kbar*dl(1) + hjbar*dl(1)
+          vf(6:ndmax,j,k,l,n) = rj_fl(:)*dl(1)
+
         end do
       end do
     end do
   end do
 
   return
-end subroutine visflux
+end subroutine visflux_LAD
 
 subroutine visflux_dns(ql, qr, vf, fmu)
   !**********************************************************************

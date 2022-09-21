@@ -10,10 +10,9 @@ from matplotlib.ticker import FuncFormatter
 
 
 fname1 = "output_000000.dat"
-# fname1 = "output_001000.dat"
-# fname1 = "output_020000.dat"
-fname1 = "output_060000.dat"
-# fname1 = "output_200000.dat"
+fname1 = "output_200000.dat"
+# fname1 = "output_060000.dat"
+# fname1 = "output_130000.dat"
 fname2 = "ref.dat"
 
 
@@ -48,7 +47,6 @@ q4=data1[5]  # w
 q5=data1[6]  # p
 q6=data1[7]  # ry1
 # q6=data1[7]  # ry2
-# q7=data1[8]  # ry3
 
 q1 = np.array(q1).reshape(-1, jmax).tolist()
 q2 = np.array(q2).reshape(-1, jmax).tolist()
@@ -60,76 +58,97 @@ q6 = np.array(q6).reshape(-1, jmax).tolist()
 
 
 #**  Blasius ********************
-xat = 12
-xpoint = int((xat/12)*(jmax-1))
+xat = 1  # observe point from wall start in x rigion
+xpoint = int(((xat+2)/12)*(jmax-1))
 uinf = 0.2
+Rex  = 100 # @x=1
 
-# eta = sym.symbols("eta")
-# a = 0.332
-# b = 1.73
-# c = 0.231
+eta = x2 * np.sqrt(Rex/uinf)/np.sqrt(xat)  # eta = y/x * sq(Re*x)
+u_one = np.ones(len(x2))
+u_uinf = np.array(q2).T[xpoint][:]/uinf
 
-# fdd = c*sym.exp(-0.25*(eta-b)**2)
-# fd = [ -sym.integrate(fdd,(eta,e,INFINITY)) + 0.75 for e in x2/(xat-2)*np.sqrt(100)] 
-# fd = -sym.integrate(fdd,(eta,eta,INFINITY))
-# f = -sym.integrate(fd,(eta,eta,INFINITY))
-# f = eta - b + f
+d_thry = 5.3*np.sqrt(xat)/np.sqrt(Rex/uinf)
+print("delta_thy : ",d_thry)
 
-fig.set_size_inches([10, 8])
+# for i in range(len(x2)):
+#     if (u_uinf[i]>0.995) : 
+#         scale = i
+#         break
+
+scale = np.argmax(u_uinf)
+d_calc = x2[scale]
+print("delta_cal : ",d_calc)
+
+#****** read reference solusion ************
 data2=(np.loadtxt(fname2,dtype="float",skiprows=0)).T
-print(np.shape(data2))
 
-eta = data2[0]  # eta
-y = data2[1]/15  # y
-u = data2[2]  # u
+d_ref = 5.32
+eta2  = data2[0]   # eta
+y     = data2[1]*(d_thry/d_ref) # fiten y with delta point
+# y     = data2[1]/d_thry  # fiten y with delta point
+ref_u = data2[2]  # u
+
+# x2 = x2/d_calc
+# y  = y /d_calc
+
+# x2 = x2/d_thry
+# y  = y /d_thry
 
 # # *** 2D slice ****************************
-plt.grid(False)
-nmax = x2.shape[0]
-plt.ylim(0,1.05)
+fig.set_size_inches([10, 8])
 
+plt.grid(False)
 plt.xlabel(r'$u/U$',fontsize=22,y=0)
+# plt.ylabel(r"$y/\delta$",fontsize=22)
 plt.ylabel(r"$y$",fontsize=22)
 
-u_uinf = np.array(q2).T[xpoint][:]/uinf
-ref = np.ones(len(x2))
+plt.plot(u_one, x2, linewidth=1, color="gray", linestyle="dashed",zorder=1)
 
-plt.plot(ref, x2, linewidth=1, color="gray", linestyle="dashed",zorder=1)
+plt.ylim(0,2)
+plt.ylim(0,1)
 plt.plot(u_uinf, x2, linewidth=2, color="red", linestyle="solid",zorder=1)
-plt.plot(u, y, linewidth=2, color="black", linestyle="solid",zorder=1)
+plt.plot(ref_u, y, linewidth=2, color="black", linestyle="solid",zorder=1)
+
+# plt.ylim(0,8)
+# plt.plot(u_uinf, eta , linewidth=2, color="red", linestyle="solid",zorder=1)
+# plt.plot(ref_u , eta2, linewidth=2, color="black", linestyle="solid",zorder=1)
 
 ax = plt.gca()
 aspect = 1/1* (ax.get_xlim()[1] - ax.get_xlim()[0]) / (ax.get_ylim()[1] - ax.get_ylim()[0])                     
 ax.set_aspect(aspect)
+fig.savefig("2dtest_udist.png")
 
 # *** 2D contour ***************************
-# # plt.xlim(0,1)
-# plt.ylim(0,0.4)
-# plt.grid(False)
-# nmax = x1.shape[0]
+fig.set_size_inches([15, 4])
+# plt.xlim(0,1)
+# plt.ylim(0,10)
+plt.grid(False)
+nmax = x1.shape[0]
 
-# # plt.title("Plot 2D array")
+# plt.title("Plot 2D array")
 # plt.xlabel(r'$x$',fontsize=22)
-# plt.ylabel(r"$y$",fontsize=22)
-# # plt.xticks(np.arange(0,1.2,0.2))
+# plt.ylabel(r"$y/\delta$",fontsize=22)
+# plt.xticks(np.arange(0,1.2,0.2))
 
-# xx, yy = np.meshgrid(x1, x2)
-# cf = plt.contourf(xx, yy, q1, cmap="jet")
-# cf = plt.contourf(xx, yy, q2, cmap="jet")
-# # cf = plt.contourf(xx, yy, q3, cmap="jet")
-# # cf = plt.contourf(xx, yy, q4, cmap="jet")
+xx, yy = np.meshgrid(x1, x2)
+cf = plt.contourf(xx, yy, q1, cmap="jet",levels=10)
+cf = plt.contourf(xx, yy, q2, cmap="jet",levels=10)
+# cf = plt.contourf(xx, yy, q3, cmap="jet")
+# cf = plt.contourf(xx, yy, q4, cmap="jet")
 # cf = plt.contourf(xx, yy, q5, cmap="jet",levels=36)
-# # cf = plt.contourf(xx, yy, q6, cmap="jet")
-# # plt.plot(x2,fd)
+# cf = plt.contourf(xx, yy, q6, cmap="jet")
+# plt.plot(x2,fd)
+plt.plot(x1, 5.3*np.sqrt(x1-2)/np.sqrt(Rex/uinf), linewidth=2, color="black", linestyle="solid",zorder=1)
 
-# cb = plt.colorbar(cf)
-# cb.set_label(r'$u$',fontsize=22,y=1,x=1.2,rotation=0)
-# cb.formatter.set_scientific(True)
-# cb.ax.ticklabel_format(style='sci', scilimits=(-8,8)) 
 
-# ax = plt.gca()
-# aspect = 1/4* (ax.get_xlim()[1] - ax.get_xlim()[0]) / (ax.get_ylim()[1] - ax.get_ylim()[0])                     
-# ax.set_aspect(aspect)
+cb = plt.colorbar(cf)
+cb.set_label(r'$u$',fontsize=22,y=1,x=1.2,rotation=0)
+cb.formatter.set_scientific(True)
+cb.ax.ticklabel_format(style='sci', scilimits=(-8,8)) 
+
+ax = plt.gca()
+aspect = 1/4* (ax.get_xlim()[1] - ax.get_xlim()[0]) / (ax.get_ylim()[1] - ax.get_ylim()[0])                     
+ax.set_aspect(aspect)
 
 # plt.show()
 fig.savefig("2dtest.png")
