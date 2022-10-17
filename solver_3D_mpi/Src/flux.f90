@@ -601,7 +601,7 @@ contains
             u1(1)  = ql(2,j,k,l,n)
             u1(2)  = ql(3,j,k,l,n)
             u1(3)  = ql(4,j,k,l,n)
-            p1  = ql(5,j,k,l,n)
+            p1     = ql(5,j,k,l,n)
             ry1(:) = ql(6:ndmax,j,k,l,n)
             r1 = sum(ry1(:))
 
@@ -612,7 +612,7 @@ contains
             u2(1)  = qr(2,j+dl(1),k+dl(2),l+dl(3),n)
             u2(2)  = qr(3,j+dl(1),k+dl(2),l+dl(3),n)
             u2(3)  = qr(4,j+dl(1),k+dl(2),l+dl(3),n)
-            p2  = qr(5,j+dl(1),k+dl(2),l+dl(3),n)
+            p2     = qr(5,j+dl(1),k+dl(2),l+dl(3),n)
             ry2(:) = qr(6:ndmax,j+dl(1),k+dl(2),l+dl(3),n)
             r2 = sum(ry2(:))
 
@@ -620,19 +620,19 @@ contains
             g2 = calgm(qr(:,j+dl(1),k+dl(2),l+dl(3),n),m2)  
 
             c1 = m1/r1*r2/m2
-            c2 = m2/r2*r1/m1 
+            c2 = m2/r2*r1/m1
 
             ry_fl(:) = 0.5d0*( c2*ry2(:) + c1*ry1(:))
             r_fl = sum(ry_fl(:))
 
             u_fl(:) = 0.5d0*( u1(:) + u2(:) )
-            pibar = 0.5d0*( p1 + p2 )
+            pibar   = 0.5d0*( p1 + p2 )
 
             cybar(:) = ry_fl(:)*u_fl(n)
-            cbar = r_fl*u_fl(n)
+            cbar     = r_fl*u_fl(n)
             mubar(:) = cbar*u_fl(:)
       
-            kbar = cbar*(u1(1)*u2(1)+u1(2)*u2(2)+u1(3)*u2(3))*0.5d0
+            kbar = cbar*(u1(1)*u2(1) + u1(2)*u2(2) + u1(3)*u2(3))*0.5d0
             ibar = 0.5d0*(p1*g1 + p2*g2)*u_fl(n)
             pbar = ( p1*u2(n) + u1(n)*p2 )*0.5d0
         
