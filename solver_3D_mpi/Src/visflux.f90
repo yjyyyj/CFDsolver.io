@@ -1,6 +1,6 @@
 subroutine visflux_LAD(ql, qr, vf, fmu)
   !**********************************************************************
-  !*     caluculate right-hand-side                                     *
+  !*     caluculate numerical viscuss term                              *
   !**********************************************************************
   use param
   implicit none
@@ -17,7 +17,7 @@ subroutine visflux_LAD(ql, qr, vf, fmu)
   double precision,dimension(ndim) :: u1,u2,u_fl
   integer,dimension(ndim) :: dl
 
-  diff(:) = 0.001d0
+  diff(:) = 0.002d0
   diff = diff*vflag
 
   do n=1,ndim
@@ -109,7 +109,7 @@ end subroutine visflux_LAD
 
 subroutine visflux_dns(ql, qr, vf, fmu)
   !**********************************************************************
-  !*     caluculate right-hand-side                                     *
+  !*     caluculate physical viscuss term                               *
   !**********************************************************************
   use param
   implicit none
@@ -549,9 +549,17 @@ subroutine visflux_dns(ql, qr, vf, fmu)
   return
 end subroutine visflux_dns
 
+subroutine visflux_none(ql, qr, vf, fmu)
+  !**********************************************************************
+  !*     dummy subroutine for invicid flows                             *
+  !**********************************************************************
+
+  return
+end subroutine visflux_none
+
 subroutine calc_viscoefs(q, fmu)
   !**********************************************************************
-  !*     caluculate right-hand-side                                     *
+  !*     caluculate the viscuss coefficients                            *
   !**********************************************************************
   use param
   implicit none

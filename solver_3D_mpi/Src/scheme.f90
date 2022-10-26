@@ -1,6 +1,6 @@
 module scheme_mod
     !******************************************************************
-    !*     The scheme has state for Solver                            *
+    !*     The scheme with important state of Solver                  *
     !******************************************************************
     use param
     implicit none
@@ -36,7 +36,6 @@ contains
     ! end subroutine set_q
 
     subroutine select_flux(self,irhs)
-        use flux
         class(scheme) self
         integer,intent(in) :: irhs
 
@@ -55,8 +54,8 @@ contains
             self%calc_flux => flux_KEEP_PE
         case(5)
             write(*,*) "Proposed"
-            ! self%calc_flux => flux_proposed
-            self%calc_flux => flux_prodiv
+            self%calc_flux => flux_proposed
+            ! self%calc_flux => flux_prodiv
         case default
             write(*,*) "[Error] invalid number of flux in main.f90: ",irhs
             stop
@@ -70,7 +69,7 @@ contains
         select case(vflag)
         case(0)
             write(*,*) "Euler"
-            ! self%calc_visflux => NULL()
+            self%calc_visflux => visflux_none
         case(1)
             write(*,*) "LAD"
             self%calc_visflux => visflux_LAD
@@ -111,9 +110,6 @@ contains
             write(*,*) "1stEuler"
             self%calc_step => step_euler
         case(2)
-            write(*,*) "TVDRK3"
-            self%calc_step => step_RK4
-        case(3)
             write(*,*) "RK4"
             self%calc_step => step_RK4
         case default

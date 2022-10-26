@@ -11,12 +11,8 @@ program main
   type(scheme) :: myscheme
 
   ! set main param
-  ! jmax  = 121
-  ! kmax  = 3
-  ! lmax  = 201
   jmax  = 501
   kmax  = 3
-  ! lmax  = 501
   lmax  = 3
 
   call read_stdin()
@@ -40,8 +36,8 @@ program main
       call sumdf(qc, n)
       ! call residual(n)
       ! call outf(q, n)
-      call outf_slice(q, n)
-      ! call outf_1d(q, n)
+      ! call outf_slice(q, n)
+      call outf_1d(q, n)
     endif
   enddo
 

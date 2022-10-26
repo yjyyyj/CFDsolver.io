@@ -1,6 +1,6 @@
 subroutine firstOrderQ(q, ql, qr)
   !**********************************************************************
-  !*     caluculate right-hand-side                                     *
+  !*     caluculate Q-face value with 1st-order                         *
   !**********************************************************************
   use param
   implicit none
@@ -25,7 +25,7 @@ end subroutine firstOrderQ
 
 subroutine muscl_va(q, ql, qr)
   !**********************************************************************
-  !*     caluculate right-hand-side                                     *
+  !*     caluculate Q-face value with MUSCL                             *
   !**********************************************************************
   use param
   implicit none

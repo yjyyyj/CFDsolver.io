@@ -1,6 +1,6 @@
 subroutine init_flow(q, q0, qc)
   !**********************************************************************
-  !*     initialize                                                     *
+  !*     initialize flow fields                                         *
   !**********************************************************************
   use param
   implicit none
@@ -91,8 +91,8 @@ subroutine init_flow(q, q0, qc)
   ! call residual_init()
 
   ! call outf_init(q)
-  call outf_slice_init(q)
-  ! call outf_1d_init(q)
+  ! call outf_slice_init(q)
+  call outf_1d_init(q)
 
   write(*,*) "set init"
 
@@ -134,6 +134,10 @@ subroutine nonDimtize(q0)
   return
 end subroutine nonDimtize
 
+!**********************************************************************
+!*     generate flow fields subroutines                               *
+!**********************************************************************
+
 subroutine TGV_init(q0)
   use param
   implicit none
@@ -169,45 +173,6 @@ subroutine TGV_init(q0)
 
   return
 end subroutine TGV_init
-
-! subroutine contact_init_tangential(q0)
-!   use param
-!   implicit none
-!   integer j,k,l
-!   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
-!   double precision, dimension(nspecies)   :: ry, ryw
-!   double precision  r
-!   double precision  xc, yc, zc, const
-
-!   r = 0d0
-!   xc = 0.5d0
-!   yc = 0.5d0
-!   zc = 0.5d0
-
-!   const = 15d0
-!   ryw(1) = 0.8d0
-!   ryw(2) = 0.2d0
-
-!   ! contact 
-!   do l=1,lmax
-!     do k=1,kmax
-!       do j=1,jmax
-!         r = sqrt( (xg(j)- xc)**2 )
-!         ry(1) = ryw(1)*(1d0 - 0.5d0*(tanh(const*( r -0.25d0)) + 1d0))
-!         ry(2) = ryw(2)*(0.5d0*(tanh(const*( r -0.25d0)) + 1d0))
-
-!         q0(1,j,k,l) = ry(1) + ry(2)     ! rho
-!         q0(2,j,k,l) = 0.0d0         ! u
-!         q0(3,j,k,l) = 0.0d0         ! v
-!         q0(4,j,k,l) = 0.5d0*(tanh(const*( r -0.25d0)))         ! w
-!         q0(5,j,k,l) = 0.9d0         ! p
-!         q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
-!       end do
-!     end do
-!   end do
-
-!   return
-! end subroutine contact_init_tangential
 
 subroutine contact_init_tangential(q0)
   use param
@@ -247,6 +212,46 @@ subroutine contact_init_tangential(q0)
 
   return
 end subroutine contact_init_tangential
+
+subroutine contact_init_tangential2(q0)
+  use param
+  implicit none
+  integer j,k,l
+  double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
+  double precision, dimension(nspecies)   :: ry, ryw
+  double precision  r
+  double precision  xc, yc, zc, const
+
+  r = 0d0
+  xc = 0.5d0
+  yc = 0.5d0
+  zc = 0.5d0
+
+  const = 15d0
+  ryw(1) = 0.8d0
+  ryw(2) = 0.2d0
+
+  ! contact 
+  do l=1,lmax
+    do k=1,kmax
+      do j=1,jmax
+        r = sqrt( (xg(j)- xc)**2 )
+        ry(1) = ryw(1)*(1d0 - 0.5d0*(tanh(const*( r -0.25d0)) + 1d0))
+        ry(2) = ryw(2)*(0.5d0*(tanh(const*( r -0.25d0)) + 1d0))
+
+        q0(1,j,k,l) = ry(1) + ry(2)     ! rho
+        q0(2,j,k,l) = 0.0d0         ! u
+        q0(3,j,k,l) = 0.0d0         ! v
+        q0(4,j,k,l) = 0.5d0*(tanh(const*( r -0.25d0)))         ! w
+        q0(5,j,k,l) = 0.9d0         ! p
+        q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
+      end do
+    end do
+  end do
+
+  return
+end subroutine contact_init_tangential2
+
 
 subroutine contact_init(q0)
   use param
@@ -311,9 +316,9 @@ subroutine contact_init_sharp(q0)
   ! Ru = 200d0
 
   ! *** T=const  *******
-  ryw(1) = 0.005d0*mwi(1)
-  ryw(2) = 0.005d0*mwi(2)
-  Ru = 190d0
+  ryw(1) = 0.025d0*mwi(1)
+  ryw(2) = 0.025d0*mwi(2)
+  Ru = 50d0
 
 
   ! contact 

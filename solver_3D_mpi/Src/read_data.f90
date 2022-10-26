@@ -1,6 +1,6 @@
 subroutine read_stdin()
   !**********************************************************************
-  !*     initialize                                                     *
+  !*     read parameters from stdin                                     *
   !**********************************************************************
   use param
   implicit none
@@ -77,7 +77,7 @@ end subroutine read_stdin
 
 subroutine read_flow(q0)
   !**********************************************************************
-  !*     initialize                                                     *
+  !*     read flow data from restart file (flow.dat)                    *
   !**********************************************************************
   use param
   implicit none

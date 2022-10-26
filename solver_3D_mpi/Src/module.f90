@@ -1,4 +1,7 @@
 module param
+  !******************************************************************
+  !*     function & parameter module                                *
+  !******************************************************************
   implicit none
   
   double precision :: cfl
@@ -45,10 +48,13 @@ module param
   contains
 
   double precision function calmw(qc)
-  double precision,intent(in) :: qc(ndmax)
-  double precision  :: r
-  double precision  :: ry(nspecies)
-  integer i
+    !******************************************************************
+    !*     calc molar weight function                                 *
+    !******************************************************************
+    double precision,intent(in) :: qc(ndmax)
+    double precision  :: r
+    double precision  :: ry(nspecies)
+    integer i
 
     ry(:) = qc(6:ndmax)
     r = sum(ry(:))
@@ -60,11 +66,14 @@ module param
   end function 
 
   double precision function calgm(qc,mw_mix)
-  double precision,intent(in) :: qc(ndmax)
-  double precision,intent(in) :: mw_mix
-  double precision :: r
-  double precision :: ry(nspecies)
-  integer i
+    !******************************************************************
+    !*     calc G: 1/(gamma - 1) function                             *
+    !******************************************************************
+    double precision,intent(in) :: qc(ndmax)
+    double precision,intent(in) :: mw_mix
+    double precision :: r
+    double precision :: ry(nspecies)
+    integer i
 
     ry(:) = qc(6:ndmax)
     r = sum(ry(:))

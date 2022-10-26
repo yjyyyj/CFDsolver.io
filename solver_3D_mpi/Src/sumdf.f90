@@ -1,6 +1,6 @@
 subroutine sumdf_init(qc)
   !**********************************************************************
-  !*     output data                                                    *
+  !*     initialize output data format                                  *
   !**********************************************************************
   use param
   implicit none
@@ -32,7 +32,7 @@ end subroutine sumdf_init
 
 subroutine sumdf(qc, n)
   !**********************************************************************
-  !*     output data                                                    *
+  !*     output QC summation data                                       *
   !**********************************************************************
   use param
   implicit none
@@ -64,7 +64,7 @@ end subroutine sumdf
 
 subroutine residual_init()
   !**********************************************************************
-  !*     output data                                                    *
+  !*     initialize output data format                                  *
   !**********************************************************************
   use param
   implicit none
@@ -81,7 +81,7 @@ end subroutine residual_init
 
 subroutine residual(n)
   !**********************************************************************
-  !*     output data                                                    *
+  !*     output residual data                                           *
   !**********************************************************************
   use param
   implicit none
