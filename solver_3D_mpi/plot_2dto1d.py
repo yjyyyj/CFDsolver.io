@@ -9,7 +9,7 @@ fname1 = "output_000000.dat"
 # fname1 = "output_000005.dat"
 # fname1 = "output_006000.dat"
 # fname1 = "output_008000.dat"
-fname1 = "output_050000.dat"
+# fname1 = "output_050000.dat"
 # fname1 = "output_010000.dat"
 
 

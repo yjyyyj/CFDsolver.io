@@ -5,10 +5,9 @@ import matplotlib.pyplot as plt
 range_min=-1e-2
 range_max= 1e-3
 fname0 = "output_000000.dat"
-# fname1 = "output_000001.dat"
 # fname1 = "output_000010.dat"
 # fname1 = "output_000100.dat"
-fname1 = "output_001000.dat"
+fname1 = "output_010000.dat"
 # fname1 = "output_500000.dat"
 
 # global settings
@@ -66,11 +65,11 @@ plt.ylabel(r"$\rho Y_i,\: u, p, T$",fontsize=28)
 
 
 # plt.plot(x1[:nmax], q0_1[:nmax], "o", color="gray"       , markevery=20, markersize="10", markerfacecolor="white", zorder=-1)
-plt.plot(x1[:nmax], q0_2[:nmax], "o", color="red"        , markevery=20, markersize="10", markerfacecolor="white", zorder=-2)
-plt.plot(x1[:nmax], q0_5[:nmax], "o", color="green"      , markevery=20, markersize="10", markerfacecolor="white", zorder=-5)
-plt.plot(x1[:nmax], q0_6[:nmax], "o", color="blue"       , markevery=20, markersize="10", markerfacecolor="white", zorder=-6)
-plt.plot(x1[:nmax], q0_7[:nmax], "o", color="orange"     , markevery=20, markersize="10", markerfacecolor="white", zorder=-7)
-plt.plot(x1[:nmax], q0_8[:nmax], "o", color="purple"     , markevery=20, markersize="10", markerfacecolor="white", zorder=-8)
+plt.plot(x0_1[:nmax], q0_2[:nmax], "o", color="red"        , markevery=20, markersize="10", markerfacecolor="white", zorder=-2)
+plt.plot(x0_1[:nmax], q0_5[:nmax], "o", color="green"      , markevery=20, markersize="10", markerfacecolor="white", zorder=-5)
+plt.plot(x0_1[:nmax], q0_6[:nmax], "o", color="blue"       , markevery=20, markersize="10", markerfacecolor="white", zorder=-6)
+plt.plot(x0_1[:nmax], q0_7[:nmax], "o", color="orange"     , markevery=20, markersize="10", markerfacecolor="white", zorder=-7)
+plt.plot(x0_1[:nmax], q0_8[:nmax], "o", color="purple"     , markevery=20, markersize="10", markerfacecolor="white", zorder=-8)
 
 # plt.plot(x1[:nmax], q1[:nmax], linewidth=1.2, color="gray"         , linestyle="solid",zorder=1)
 plt.plot(x1[:nmax], q2[:nmax], linewidth=1.2, color="red"          , linestyle="solid",zorder=2)
@@ -85,5 +84,5 @@ plt.plot(x1[:nmax], q8[:nmax], linewidth=1.2, color="purple"       , linestyle="
 
 # plt.show()
 fig.savefig("1dtest.png")
-fig.savefig("1dtest.pdf")
+# fig.savefig("1dtest.pdf")
 
