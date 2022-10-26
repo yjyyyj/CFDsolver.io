@@ -1,4 +1,4 @@
-subroutine visflux_LAD(ql, qr, vf)
+subroutine visflux_LAD(ql, qr, vf, fmu)
   !**********************************************************************
   !*     caluculate right-hand-side                                     *
   !**********************************************************************
@@ -7,6 +7,7 @@ subroutine visflux_LAD(ql, qr, vf)
   integer j,k,l,n
   double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: vf
   double precision,dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1),ndim) :: ql, qr
+  double precision :: fmu           ! viscous coefficient
   double precision r1,r2,p1,p2,k1,k2,e1,e2
   double precision m1,m2,g1,g2
   double precision r_fl,pbar,kbar,hjbar
@@ -16,7 +17,7 @@ subroutine visflux_LAD(ql, qr, vf)
   double precision,dimension(ndim) :: u1,u2,u_fl
   integer,dimension(ndim) :: dl
 
-  diff(:) = 0.005d0
+  diff(:) = 0.001d0
   diff = diff*vflag
 
   do n=1,ndim
@@ -67,10 +68,10 @@ subroutine visflux_LAD(ql, qr, vf)
           
           !****** mass diff ********************************* 
           j_fl(:)  = 0.5d0*diff(:)*(phi2(:) - phi1(:))/dx(n) ! nabla phi_i
-          ! rj_fl(:) = 0.5d0*(r2/m2*mwi(:) + r1/m1*mwi(:))*j_fl(:) ! rho_i|_{j+1/2} j_i|_{j+1/2}
+          rj_fl(:) = 0.5d0*(r2/m2*mwi(:) + r1/m1*mwi(:))*j_fl(:) ! rho_i|_{j+1/2} j_i|_{j+1/2}
 
-          grad_y(:) = 0.5d0*(ry2(:)/r2 - ry1(:)/r1)/dx(n)  
-          rj_fl(:) = r_fl*diff(:)*grad_y(:) - 0.5d0*(ry2(:)/r2 + ry1(:)/r1)*sum(r_fl*diff*grad_y(:))   
+          ! grad_y(:) = 0.5d0*(ry2(:)/r2 - ry1(:)/r1)/dx(n)  
+          ! rj_fl(:) = r_fl*diff(:)*grad_y(:) - 0.5d0*(ry2(:)/r2 + ry1(:)/r1)*sum(r_fl*diff*grad_y(:))   
           ! rj_fl(:) = 0.5d0*(r1+r2) * 0.5d0*diff(:)*(ry2(:)/r2 - ry1(:)/r1)/dx ! rho|_{j+1/2} Y_i|_{j+1/2}
 
           ! rj_fl(:) = 0.5d0*diff(:)*(ry2(:) - ry1(:))/dx(n)   ! nabla rhoY_i

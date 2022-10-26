@@ -9,8 +9,10 @@ module scheme_mod
         procedure(),nopass,pointer :: calc_step => NULL()
         procedure(),nopass,pointer :: calc_faceQ => NULL()
         procedure(),nopass,pointer :: calc_flux => NULL()
+        procedure(),nopass,pointer :: calc_visflux => NULL()
         contains
         procedure :: select_flux
+        procedure :: select_visflux
         procedure :: select_muscl
         procedure :: select_step
         ! procedure :: set_q
@@ -53,12 +55,33 @@ contains
             self%calc_flux => flux_KEEP_PE
         case(5)
             write(*,*) "Proposed"
-            self%calc_flux => flux_proposed
+            ! self%calc_flux => flux_proposed
+            self%calc_flux => flux_prodiv
         case default
             write(*,*) "[Error] invalid number of flux in main.f90: ",irhs
             stop
         end select
     end subroutine select_flux
+
+    subroutine select_visflux(self,vflag)
+        class(scheme) self
+        integer,intent(in) :: vflag
+
+        select case(vflag)
+        case(0)
+            write(*,*) "Euler"
+            ! self%calc_visflux => NULL()
+        case(1)
+            write(*,*) "LAD"
+            self%calc_visflux => visflux_LAD
+        case(2)
+            write(*,*) "DNS"
+            self%calc_visflux => visflux_dns
+        case default
+            write(*,*) "[Error] invalid number of visflux in main.f90: ",vflag
+            stop
+        end select
+    end subroutine select_visflux
 
     subroutine select_muscl(self,acc)
         class(scheme) self

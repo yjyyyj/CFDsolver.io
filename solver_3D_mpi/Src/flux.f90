@@ -633,13 +633,14 @@ contains
             mubar(:) = cbar*u_fl(:)
       
             kbar = cbar*(u1(1)*u2(1) + u1(2)*u2(2) + u1(3)*u2(3))*0.5d0
-            ibar = 0.5d0*(p1*g1 + p2*g2)*u_fl(n)
+            ! ibar = 0.5d0*(p1*g1 + p2*g2)*u_fl(n)
+            ibar = 0.5d0*(g1 + g2)*pibar*u_fl(n)
             pbar = ( p1*u2(n) + u1(n)*p2 )*0.5d0
         
             f(1,j,k,l,n) = 0.d0
-            f(2,j,k,l,n) = mubar(1) + pibar*dl(1)
-            f(3,j,k,l,n) = mubar(2) + pibar*dl(2)
-            f(4,j,k,l,n) = mubar(3) + pibar*dl(3)
+            f(2,j,k,l,n) = mubar(1) + pibar*dble(dl(1))
+            f(3,j,k,l,n) = mubar(2) + pibar*dble(dl(2))
+            f(4,j,k,l,n) = mubar(3) + pibar*dble(dl(3))
             f(5,j,k,l,n) = kbar + ibar + pbar
             f(6:ndmax,j,k,l,n) = cybar(:)
           end do
@@ -649,5 +650,77 @@ contains
 
     return
   end subroutine flux_proposed
+
+  subroutine flux_prodiv(ql, qr, f)
+    !**********************************************************************
+    !*     caluculate right-hand-side                                     *
+    !**********************************************************************
+    use param
+    implicit none
+    integer j,k,l,n
+    double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f
+    double precision,dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1),ndim) :: ql, qr
+    double precision r1,r2,p1,p2,k1,k2,e1,e2
+    double precision m1,m2,g1,g2,c1,c2
+    double precision,dimension(nspecies) :: ry1, ry2
+    double precision,dimension(ndim) :: u1,u2
+    integer,dimension(ndim) :: dl
+
+    do n=1,ndim
+      dl(:)=0
+      dl(n)=1
+      !$omp parallel do default(none) &
+      !$OMP & firstprivate(dl,n) &
+      !$OMP & shared(f, ql, qr,jmax,kmax,lmax,ndmax) &
+      !$OMP & private(r1,r2,p1,p2,k1,k2,e1,e2,m1,m2,g1,g2,c1,c2) & 
+      !$OMP & private(ry1,ry2,u1,u2) 
+      do l=0,lmax
+        do k=0,kmax
+          do j=0,jmax
+          !*** x direction *************************************!
+            ! left face q
+            u1(1)  = ql(2,j,k,l,n)
+            u1(2)  = ql(3,j,k,l,n)
+            u1(3)  = ql(4,j,k,l,n)
+            p1  = ql(5,j,k,l,n)
+            ry1(:) = ql(6:ndmax,j,k,l,n)
+            r1 = sum(ry1(:))
+
+            m1 = calmw(ql(:,j,k,l,n))
+            g1 = calgm(ql(:,j,k,l,n),m1)
+        
+            ! right face q
+            u2(1)  = qr(2,j+dl(1),k+dl(2),l+dl(3),n)
+            u2(2)  = qr(3,j+dl(1),k+dl(2),l+dl(3),n)
+            u2(3)  = qr(4,j+dl(1),k+dl(2),l+dl(3),n)
+            p2  = qr(5,j+dl(1),k+dl(2),l+dl(3),n)
+            ry2(:) = qr(6:ndmax,j+dl(1),k+dl(2),l+dl(3),n)
+            r2 = sum(ry2(:))
+
+            m2 = calmw(qr(:,j+dl(1),k+dl(2),l+dl(3),1))
+            g2 = calgm(qr(:,j+dl(1),k+dl(2),l+dl(3),1),m2)  
+
+            c1 = m1/r1*r2/m2
+            c2 = m2/r2*r1/m1 
+
+            k1 = c1*r1*(u1(1)*u1(1)+u1(2)*u1(2)+u1(3)*u1(3))*0.5d0
+            k2 = c2*r2*(u2(1)*u2(1)+u2(2)*u2(2)+u2(3)*u2(3))*0.5d0
+
+            e1 = p1*g1
+            e2 = p2*g2
+            
+            f(1,j,k,l,n) = 0.d0
+            f(2,j,k,l,n) = 0.5d0*( c1*r1*u1(1)*u1(n) + c2*r2*u2(1)*u2(n) + (p1 + p2)*dble(dl(1)) )
+            f(3,j,k,l,n) = 0.5d0*( c1*r1*u1(2)*u1(n) + c2*r2*u2(2)*u2(n) + (p1 + p2)*dble(dl(2)) )
+            f(4,j,k,l,n) = 0.5d0*( c1*r1*u1(3)*u1(n) + c2*r2*u2(3)*u2(n) + (p1 + p2)*dble(dl(3)) )
+            f(5,j,k,l,n) = 0.5d0*( (k1+e1+p1)*u1(n) + (k2+e2+p2)*u2(n) )
+            f(6:ndmax,j,k,l,n) = 0.5d0*( c1*ry1(:)*u1(n) + c2*ry2(:)*u2(n) )
+          end do
+        end do
+      end do
+    end do
+
+    return
+  end subroutine flux_prodiv
   
 end module flux

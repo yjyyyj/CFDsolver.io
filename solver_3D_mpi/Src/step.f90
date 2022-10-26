@@ -107,6 +107,7 @@ subroutine step_RK4(q, qc, myscheme)
   double precision,parameter :: rc3(1:4) = (/1.0d0/2.0d0,1.0d0/2.0d0,1.0d0,1.0d0/6.0d0/)
   double precision,parameter :: rc4(1:4) = (/1.0d0,2.0d0,2.0d0,0.0d0/)
   double precision,dimension(0:(jmax+1),0:(kmax+1),0:(lmax+1)) :: fmu           ! viscous coefficient
+  double precision :: ruvw2
 
   qcold1 = qc
   qcold2 = 0.d0
@@ -122,14 +123,17 @@ subroutine step_RK4(q, qc, myscheme)
     resid = 0.0d0
 
 
-    call calc_viscoefs(q, fmu)
+    ! call calc_viscoefs(q, fmu)
     call bc(q,fmu)
     call myscheme%calc_faceQ(q, ql, qr)
     call myscheme%calc_flux(ql, qr, f)
-    ! call visflux_dns(ql, qr, vf,fmu)
+    ! call myscheme%calc_visflux(ql, qr, vf, fmu)
+    ! call visflux_dns(ql, qr, vf, fmu)
     ! call visflux_LAD(ql, qr, vf)
 
-    !$omp parallel do shared(q,qc,qcold1,qcold2,f,vf)
+    !******** time propagation *****************************************************
+
+    !$omp parallel do shared(q,qc,qcold1,qcold2,f,vf,s,dt,dx)
     do l=1,lmax
       do k=1,kmax
         do j=1,jmax
@@ -152,18 +156,23 @@ subroutine step_RK4(q, qc, myscheme)
           qc(1,j,k,l) = sum(qc(6:ndmax,j,k,l))
           mw(j,k,l)  = calmw(qc(:,j,k,l))
           gam(j,k,l) = calgm(qc(:,j,k,l),mw(j,k,l))
+          ruvw2 = qc(2,j,k,l)*qc(2,j,k,l) +qc(3,j,k,l)*qc(3,j,k,l) +qc(4,j,k,l)*qc(4,j,k,l)
+
 
           q(1,j,k,l) = qc(1,j,k,l) ! rho
           q(2,j,k,l) = qc(2,j,k,l)/qc(1,j,k,l) ! u
           q(3,j,k,l) = qc(3,j,k,l)/qc(1,j,k,l) ! v
           q(4,j,k,l) = qc(4,j,k,l)/qc(1,j,k,l) ! w
-          q(5,j,k,l) = ( qc(5,j,k,l) - 0.5d0*( qc(2,j,k,l)**2 +qc(3,j,k,l)**2 +qc(4,j,k,l)**2 )/qc(1,j,k,l) )/gam(j,k,l) ! p
+          q(5,j,k,l) = ( qc(5,j,k,l) - 0.5d0*ruvw2/qc(1,j,k,l) )/gam(j,k,l) ! p
+          ! q(5,j,k,l) = ( qc(5,j,k,l) - 0.5d0*( qc(2,j,k,l)**2 +qc(3,j,k,l)**2 +qc(4,j,k,l)**2 )/qc(1,j,k,l) )/gam(j,k,l) ! p
           q(6:ndmax,j,k,l) = qc(6:ndmax,j,k,l) ! rhoy
 
           !*****************************************************
         enddo
       enddo
     enddo
+
+    !******** calc residual *****************************************************
 
     !$omp parallel do reduction(+:resid)
     do l=1,lmax

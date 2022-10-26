@@ -7,8 +7,10 @@ range_min=-1e-2
 range_max= 1e-3
 fname1 = "output_000000.dat"
 # fname1 = "output_000005.dat"
-# fname1 = "output_002000.dat"
-fname1 = "output_010000.dat"
+# fname1 = "output_006000.dat"
+# fname1 = "output_008000.dat"
+fname1 = "output_050000.dat"
+# fname1 = "output_010000.dat"
 
 
 # global settings
@@ -31,11 +33,11 @@ data1=(np.loadtxt(fname1,dtype="float",skiprows=0)).T
 print(np.shape(data1))
 
 # data definition
-jmax = 201
-kmax = 201
+jmax = 501
+kmax = 3
 
 x1=data1[0,:jmax]  # x
-x2=data1[0,:kmax]  # y
+
 q1=data1[2]  # r
 q2=data1[3]  # u
 q3=data1[4]  # v

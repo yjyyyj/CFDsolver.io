@@ -7,6 +7,7 @@ OPT = -O3
 # OPT = -O ${DEBUG}
 LDFLAGS = -fopenmp
 FFLAGS =-fconvert=little-endian  -frecord-marker=${MARK} ${LDFLAGS} ${OPT}
+# FFLAGS =-fconvert=little-endian  -frecord-marker=${MARK} ${OPT}
 # FFLAGS =-fconvert=big-endian -frecord-marker=${MARK} ${LDFLAGS} ${OPT}
 
 # FFLAGS2=${FFLAGS}

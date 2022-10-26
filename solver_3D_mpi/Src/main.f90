@@ -14,10 +14,10 @@ program main
   ! jmax  = 121
   ! kmax  = 3
   ! lmax  = 201
-  jmax  = 201
+  jmax  = 501
   kmax  = 3
-  lmax  = 201
-  ! lmax  = 3
+  ! lmax  = 501
+  lmax  = 3
 
   call read_stdin()
   allocate( q(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1)) )
@@ -30,6 +30,7 @@ program main
   call myscheme%select_step(ilhs)
   call myscheme%select_muscl(acc)
   call myscheme%select_flux(irhs)
+  call myscheme%select_visflux(vflag)
 
   !***** main loop *****************************************************!
 
