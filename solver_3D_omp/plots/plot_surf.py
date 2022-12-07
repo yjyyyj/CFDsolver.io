@@ -6,7 +6,7 @@ from matplotlib.colors import Normalize
 
 range_min=-1e-4
 range_max= 1e-4
-fname1 = "output_000000.dat"
+fname1 = "output_pro.dat"
 
 # global settings
 plt.rcParams['xtick.direction'] = 'in'#x軸の目盛線が内向き('in')か外向き('out')か双方向か('inout')
@@ -28,11 +28,11 @@ data1=(np.loadtxt(fname1,dtype="float",skiprows=0)).T
 print(np.shape(data1))
 
 # data definition
-jmax = 101
-kmax = 3
+jmax = 501
+kmax = 501
 
 x1=data1[0,:jmax]  # x
-x2=data1[1,:kmax]  # y
+x2=x1.T            # y
 q1=data1[2]  # r
 q2=data1[3]  # u
 q3=data1[4]  # v
@@ -75,10 +75,10 @@ ax.w_zaxis.set_pane_color((0.,0.,0.,0.))
 
 ax.grid(False)
 
-surf = ax.plot_surface(xx, yy, q1, cmap='jet',rstride=1,cstride=1,linewidth=0,antialiased=False, shade=True)
+# surf = ax.plot_surface(xx, yy, q1, cmap='jet',rstride=1,cstride=1,linewidth=0,antialiased=False, shade=True)
 # surf = ax.plot_surface(xx, yy, q2, cmap='jet',rstride=1,cstride=1,linewidth=0,antialiased=False, shade=True)
 # surf = ax.plot_surface(xx, yy, q3, cmap='jet',rstride=1,cstride=1,linewidth=0,antialiased=False, shade=True)
-# surf = ax.plot_surface(xx, yy, q4, cmap='jet',norm=Normalize(vmin=range_min, vmax=range_max),rstride=1,cstride=1,linewidth=0,antialiased=False, shade=True)
+surf = ax.plot_surface(xx, yy, q4, cmap='jet',norm=Normalize(vmin=range_min, vmax=range_max),rstride=1,cstride=1,linewidth=0,antialiased=False, shade=True)
 # surf = ax.plot_surface(xx, yy, q5, cmap='jet',rstride=1,cstride=1,linewidth=0,antialiased=False, shade=True)
 # surf = ax.plot_surface(xx, yy, q6, cmap='jet',rstride=1,cstride=1,linewidth=0,antialiased=False, shade=True)
 
@@ -88,7 +88,7 @@ cb.formatter.set_scientific(True)
 # ax.view_init(elev=60, azim=45)
 cb.ax.ticklabel_format(style='sci', scilimits=(-3,3)) 
 
-# plt.show()
+plt.show()
 
-fig.savefig("2dtest.pdf")
+# fig.savefig("1dtest_pro.pdf")
 # fig.savefig("1dtest_pro.pdf")

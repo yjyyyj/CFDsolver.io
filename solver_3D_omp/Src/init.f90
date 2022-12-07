@@ -199,8 +199,8 @@ subroutine contact_init_tangential(q0)
     do k=1,kmax
       do j=1,jmax
         r = sqrt( (xg(j)- xc)**2 )
-        ry(1) = ryw(1)*(1d0 - 0.5d0*(tanh(const*( r -0.25d0)) + 1d0))
-        ry(2) = ryw(2)*(0.5d0*(tanh(const*( r -0.25d0)) + 1d0))
+        ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r -0.25d0)))
+        ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r -0.25d0)))
 
         q0(1,j,k,l) = ry(1) + ry(2)     ! rho
         q0(2,j,k,l) = 1.0d0         ! u
@@ -236,8 +236,8 @@ subroutine contact_init_tangential2(q0)
     do k=1,kmax
       do j=1,jmax
         r = sqrt( (xg(j)- xc)**2 )
-        ry(1) = ryw(1)*(1d0 - 0.5d0*(tanh(const*( r -0.25d0)) + 1d0))
-        ry(2) = ryw(2)*(0.5d0*(tanh(const*( r -0.25d0)) + 1d0))
+        ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r -0.25d0)))
+        ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r -0.25d0)))
 
         q0(1,j,k,l) = ry(1) + ry(2)     ! rho
         q0(2,j,k,l) = 0.1d0         ! u
@@ -259,12 +259,13 @@ subroutine contact_init(q0)
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
   double precision, dimension(nspecies)   :: ry, ryw
   double precision  r
-  double precision  xc, yc, zc, const
+  double precision  xc, yc, zc,rc, const
 
   r = 0d0
   xc = 0.5d0
   yc = 0.5d0
   zc = 0.5d0
+  rc = 0.25d0
 
   const = 20d0
   ryw(1) = 0.6d0
@@ -275,8 +276,8 @@ subroutine contact_init(q0)
     do k=1,kmax
       do j=1,jmax
         r = sqrt( (xg(j)- xc)**2 )
-        ry(1) = ryw(1)*(1d0 - 0.5d0*(tanh(const*( r -0.25d0)) + 1d0))
-        ry(2) = ryw(2)*(0.5d0*(tanh(const*( r -0.25d0)) + 1d0))
+        ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - rc)))
+        ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r - rc)))
 
         q0(1,j,k,l) = ry(1) + ry(2)     ! rho
         q0(2,j,k,l) = 1.0d0         ! u
@@ -325,8 +326,8 @@ subroutine contact_init_sharp(q0)
     do k=1,kmax
       do j=1,jmax
         r = sqrt( (xg(j)- xc)**2 )
-        ry(1) = ryw(1)*(1d0 - 0.5d0*(tanh(const*( r - rc)) + 1d0))
-        ry(2) = ryw(2)*(0.5d0*(tanh(const*( r - rc)) + 1d0))
+        ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - rc)))
+        ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r - rc)))
 
         q0(1,j,k,l) = ry(1) + ry(2)     ! rho
         q0(2,j,k,l) = 1.0d0         ! u
@@ -376,8 +377,8 @@ subroutine prin_sharp_init(q0)
       do j=1,jmax
 
         r = sqrt( (xg(j)- xc)**2 + (yg(k)- yc)**2 )
-        ry(1) = ryw(1)*(1d0 - 0.5d0*(tanh(const*( r - rc)) + 1d0))
-        ry(2) = ryw(2)*(0.5d0*(tanh(const*( r - rc)) + 1d0))
+        ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - rc)))
+        ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r - rc)))
 
         q0(1,j,k,l) = ry(1) + ry(2)     ! rho
         q0(2,j,k,l) = 0.0d0         ! u
@@ -441,12 +442,13 @@ subroutine prin_init(q0)
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
   double precision, dimension(nspecies)   :: ry, ryw
   double precision  r
-  double precision  xc, yc, zc, const
+  double precision  xc, yc, zc, rc, const
 
   r = 0d0
   xc = 0.5d0
   yc = 0.5d0
   zc = 0.5d0
+  rc =0.25d0
 
   const = 15d0
   ryw(1) = 0.8d0
@@ -458,9 +460,9 @@ subroutine prin_init(q0)
       do j=1,jmax
 
         r = sqrt( (xg(j)- xc)**2 + (yg(k)- yc)**2 + (zg(l)- zc)**2 )
-        ry(1) = ryw(1)*(1d0 - 0.5d0*(tanh(const*( r -0.25d0)) + 1d0))
-        ry(2) = ryw(2)*(0.5d0*(tanh(const*( r -0.25d0)) + 1d0))
-        ! ry(1) = ryw(1)*(1d0 - 0.5d0*(tanh(const*( r -0.25d0)) + 1d0)) + 0.2d0
+        ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - rc)))
+        ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r - rc)))
+        ! ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - rc))) + 0.2d0
         ! ry(2) = 0d0
 
         q0(1,j,k,l) = ry(1) + ry(2)     ! rho
@@ -481,17 +483,15 @@ subroutine multiprin_init(q0)
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
-  double precision, dimension(nspecies)   :: ry, ryw, xc, yc
+  double precision, dimension(nspecies)   :: ry, ryw
   double precision  r
-  double precision  const
+  double precision   xc, yc, zc, const
 
   r = 0d0
-  xc(1) = 0.5d0
-  yc(1) = 0.5d0
-  xc(2) = 0.0d0
-  yc(2) = 0.5d0
-  xc(3) = 0.5d0
-  yc(3) = 0.0d0
+  xc = 0.5d0
+  yc = 0.5d0
+  zc = 0.5d0
+
 
   const = 15d0
   ryw(1) = 0.4d0
@@ -503,16 +503,10 @@ subroutine multiprin_init(q0)
     do k=1,kmax
       do j=1,jmax
 
-        r = sqrt( (xg(j)- xc(1))**2 + (yg(k)- yc(1))**2 )
-        ry(1) = ryw(1)*(1d0 - 0.5d0*(tanh(const*( r -0.3d0)) + 1d0))
-        ry(2) = ryw(2)*(0.5d0*(tanh(const*( r -0.3d0)) + 1d0))
-        ry(3) = ryw(3)*(0.5d0*(tanh(const*( r -0.2d0)) + 1d0))
-
-        ! if( r > 0.25d0) then
-        !   ry(3) = ryw(3)*(1d0 - 0.5d0*(tanh(const*( r -0.4d0)) + 1d0))
-        ! else 
-        !   ry(3) = ryw(3)*(0.5d0*(tanh(const*( r -0.2d0)) + 1d0))
-        ! endif
+        r = sqrt( (xg(j)- xc)**2 + (yg(k)- yc)**2 )
+        ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - 0.3d0)))
+        ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r - 0.3d0)))
+        ry(3) = 0.5d0*ryw(3)*(1d0 + tanh(const*( r - 0.2d0)))
 
         q0(1,j,k,l) = sum(ry(:))     ! rho
         q0(2,j,k,l) = 1.0d0         ! u
