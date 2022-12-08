@@ -23,7 +23,7 @@ ___   : split line
     ```html:sample
        make
     ```
-    The executor file, `job.out`, is generated in `solver_omp/Src/`.
+    The executor file `job.out` is generated in `solver_omp/Src/`.
 
 2. Setting simulation parameters
 
