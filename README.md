@@ -27,7 +27,7 @@ ___   : split line
 
 2. Setting simulation parameters
 
-    Edit the input file, `stdin`, in `solver_omp/`.
+    Edit the input file `stdin` in `solver_omp/`.
     The meanings of each params are written [below](#stdin).
 
 3. Start calculation
