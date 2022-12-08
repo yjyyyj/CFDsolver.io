@@ -43,20 +43,22 @@ ___   : split line
     You can visilize the results with `plot_*****.py` in `solver_omp/plots/`.
     
 ## Code preview
-  ### stdin
-  ### Makefile
-  ### Source
-    #### main.f90
-    #### read_data.f90
-    #### init.f90
-    #### step.f90
-    #### bc.f90
-    #### flux.f90
-    #### visflux.f90
-    #### muscl.f90
-    #### outf.f90
-    #### sumdf.f90
-  ### modules
-    #### scheme.f90
-    #### module.f90
-    
+### stdin
+
+### Makefile
+
+### Source
+- main.f90
+- read_data.f90
+- init.f90
+- step.f90
+- bc.f90
+- flux.f90
+- visflux.f90
+- muscl.f90
+- outf.f90
+- sumdf.f90
+
+### modules
+- scheme.f90
+- module.f90
