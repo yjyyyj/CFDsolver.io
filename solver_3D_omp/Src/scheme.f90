@@ -10,17 +10,16 @@ module scheme_mod
         procedure(),nopass,pointer :: calc_faceQ => NULL()
         procedure(),nopass,pointer :: calc_flux => NULL()
         procedure(),nopass,pointer :: calc_visflux => NULL()
+        procedure(),nopass,pointer :: calc_outf => NULL()
+        procedure(),nopass,pointer :: calc_outf_init => NULL()
         contains
         procedure :: select_flux
         procedure :: select_visflux
         procedure :: select_muscl
         procedure :: select_step
+        procedure :: select_outf
         ! procedure :: set_q
     end type scheme
-
-    ! interface scheme
-    !     module procedure init_scheme
-    ! end interface scheme
 
 contains
     ! fluxの実装部
@@ -100,6 +99,30 @@ contains
         end select
     end subroutine select_muscl
     
+    subroutine select_outf(self,dim_outf)
+        class(scheme) self
+        integer,intent(in) :: dim_outf
+        external outf_1d, outf_2d, outf_3d, outf_1d_init, outf_2d_init, outf_3d_init
+
+        select case(dim_outf)
+        case(1)
+            write(*,*) "1D outflow"
+            self%calc_outf => outf_1d
+            self%calc_outf_init => outf_1d_init
+        case(2)
+            write(*,*) "2D outflow"
+            self%calc_outf => outf_2d
+            self%calc_outf_init => outf_2d_init
+        case(3)
+            write(*,*) "3D outflow"
+            self%calc_outf => outf_3d
+            self%calc_outf_init => outf_3d_init
+        case default
+            write(*,*) "[Error] invalid number of outflow dimension in main.f90: ",dim_outf
+            stop
+        end select
+    end subroutine select_outf
+
     subroutine select_step(self,ilhs)
         class(scheme) self
         integer,intent(in) :: ilhs
@@ -117,4 +140,5 @@ contains
             stop
         end select
     end subroutine select_step
+
 end module scheme_mod

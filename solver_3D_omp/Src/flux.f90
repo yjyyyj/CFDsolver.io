@@ -273,7 +273,7 @@ subroutine flux_slau(ql, qr, f)
   integer,dimension(ndim) :: dl
   integer :: nthon
 
-  ! nthon = 1
+  nthon = 1
 
   do n=1,ndim
     dl(:)=0

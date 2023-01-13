@@ -55,7 +55,7 @@ subroutine sumdf(qc, n)
 
   open(150,file="sums.dat",form="formatted",position='append')
     write(150,fmt='(I8, 9E20.10e3)',advance='No') n, sums
-    write(*,fmt='(I8, 9E20.10e3)') n, sums
+    ! write(*,fmt='(I8, 9E20.10e3)') n, sums
   close(150)
 
   return

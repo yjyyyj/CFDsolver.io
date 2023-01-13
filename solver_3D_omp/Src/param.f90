@@ -38,6 +38,7 @@ module param
   integer :: acc
   integer :: ilhs
   integer :: vflag
+  integer :: dim_outf
   integer :: bc1, bc2, bc3, bc4, bc5, bc6
 
   ! for fmu calc in Sutherland’s eq.

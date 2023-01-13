@@ -1,15 +1,18 @@
-subroutine init_flow(q, q0, qc)
+subroutine init_flow(q, q0, qc, myscheme)
   !**********************************************************************
   !*     initialize flow fields                                         *
   !**********************************************************************
   use param
+  use scheme_mod
+
   implicit none
   double precision x0,x1,y0,y1,z0,z1
   double precision uvw2
   integer j,k,l
   double precision, dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1)) :: q
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0, qc
-  
+  type(scheme) :: myscheme
+
   x0 = 0.0d0
   x1 = 1.0d0
 
@@ -46,15 +49,14 @@ subroutine init_flow(q, q0, qc)
   end do
 
   !*** make inital flow ********************
+  !**** call init-field subroutine 
 
   ! call contact_init(q0)
+  call contact_init_sharp(q0)
   ! call contact_init_tangential(q0)
-  ! call contact_init_tangential2(q0)
-  ! call contact_init_sharp(q0)
   ! call prin_init(q0)
-  call prin_sharp_init(q0)
+  ! call prin_sharp_init(q0)
   ! call multiprin_init(q0)
-  ! call flower_init(q0)
   ! call sod_init(q0)
   ! call TGV_init(q0)
   ! call RMinstability_init(q0)
@@ -90,11 +92,8 @@ subroutine init_flow(q, q0, qc)
   ! ***************************************
 
   call sumdf_init(qc)
-  ! call residual_init()
-
-  ! call outf_init(q)
-  call outf_slice_init(q)
-  ! call outf_1d_init(q)
+  call residual_init()
+  call myscheme%calc_outf_init(q)
 
   write(*,*) "set init"
 
@@ -140,50 +139,104 @@ end subroutine nonDimtize
 !*     generate flow fields subroutines                               *
 !**********************************************************************
 
-subroutine TGV_init(q0)
-  use param
-  implicit none
-  integer j,k,l
-  double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
-  double precision, dimension(nspecies)   :: ry, ryw
-  double precision  rinf,pinf
-
-  Mach = 0.05d0
-  ryw(1) = 1.0d0
-  ryw(2) = 0.0d0
-
-  rinf = 1d0
-
-  do l=1,lmax
-    do k=1,kmax
-      do j=1,jmax
-
-        pinf = 1d0/(1d0/gam(j,k,l)+1d0)
-        ry(1) = ryw(1)*rinf
-        ry(2) = ryw(2)*rinf
-
-        q0(1,j,k,l) = ry(1) + ry(2)     ! rho
-        q0(2,j,k,l) = Mach*dsin(xg(j))*dcos(yg(k))*dcos(zg(l))   ! u
-        q0(3,j,k,l) = -Mach*dcos(xg(j))*dsin(yg(k))*dcos(zg(l))   ! v
-        q0(4,j,k,l) = 0d0   ! w
-        q0(5,j,k,l) = pinf+(rinf*Mach*Mach*(dcos(2.0d0*xg(j))+dcos(2.0d0*yg(k)))*(dcos(2.0d0*zg(l))+2d0))/16d0         ! p
-        q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
-
-      end do
-    end do
-  end do
-
-  return
-end subroutine TGV_init
-
-subroutine contact_init_tangential(q0)
+subroutine contact_init(q0)
   use param
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
   double precision, dimension(nspecies)   :: ry, ryw
   double precision  r
-  double precision  xc, yc, zc, const
+  double precision  xc, yc, zc,rc, const
+
+  r = 0d0
+  xc = 0.5d0
+  yc = 0.5d0
+  zc = 0.5d0
+  rc = 0.25d0
+
+  const = 100d0
+  ryw(1) = 0.6d0
+  ryw(2) = 0.2d0
+
+  ! contact 
+  do l=1,lmax
+    do k=1,kmax
+      do j=1,jmax
+        r = sqrt( (xg(j)- xc)**2 )
+        ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - rc)))
+        ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r - rc)))
+
+        q0(1,j,k,l) = ry(1) + ry(2)     ! rho
+        q0(2,j,k,l) = 1.0d0         ! u
+        q0(3,j,k,l) = 0.0d0         ! v
+        q0(4,j,k,l) = 0.0d0         ! w
+        q0(5,j,k,l) = 0.95d0         ! p
+        q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
+      end do
+    end do
+  end do
+
+  return
+end subroutine contact_init
+
+subroutine contact_init_sharp(q0)
+  use param
+  implicit none
+  integer j,k,l
+  double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
+  double precision, dimension(nspecies)   :: ry, ryw
+  double precision  r
+  double precision  xc, yc, zc, rc, const
+
+  xc = 0.5d0
+  yc = 0.5d0
+  zc = 0.5d0
+  rc = 0.25d0
+
+
+  const = 5000d0
+  ! const = 50d0
+
+  ! *** T= Not const  *******
+  ryw(1) = 0.6d0
+  ryw(2) = 0.2d0
+  Ru = 100d0
+
+  ! *** T=const  *******
+  ! ryw(1) = 0.03d0*mwi(1)
+  ! ryw(2) = 0.03d0*mwi(2)
+  ! Ru = 1d0/0.03d0/ 1.1d0
+
+
+  ! contact 
+  do l=1,lmax
+    do k=1,kmax
+      do j=1,jmax
+        r = sqrt( (xg(j)- xc)**2 )
+        ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - rc)))
+        ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r - rc)))
+
+        q0(1,j,k,l) = ry(1) + ry(2)     ! rho
+        q0(2,j,k,l) = 1.0d0         ! u
+        q0(3,j,k,l) = 0.0d0         ! v
+        q0(4,j,k,l) = 0.0d0         ! w
+        q0(5,j,k,l) = 0.95d0         ! p
+        q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
+      end do
+    end do
+  end do
+
+  return
+end subroutine contact_init_sharp
+
+subroutine contact_init_tangential_V(q0)
+  use param
+  implicit none
+  integer j,k,l
+  double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
+  double precision, dimension(nspecies)   :: ry, ryw
+  double precision  r
+  double precision  xc, const
 
   r = 0d0
   xc = 0.5d0
@@ -213,86 +266,9 @@ subroutine contact_init_tangential(q0)
   end do
 
   return
-end subroutine contact_init_tangential
+end subroutine contact_init_tangential_V
 
-subroutine contact_init_tangential2(q0)
-  use param
-  implicit none
-  integer j,k,l
-  double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
-  double precision, dimension(nspecies)   :: ry, ryw
-  double precision  r
-  double precision  xc, const
-
-  r = 0d0
-  xc = 0.0d0
-
-  const = 20d0
-  ryw(1) = 0.6d0
-  ryw(2) = 0.2d0
-
-  ! contact 
-  do l=1,lmax
-    do k=1,kmax
-      do j=1,jmax
-        r = sqrt( (xg(j)- xc)**2 )
-        ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r -0.25d0)))
-        ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r -0.25d0)))
-
-        q0(1,j,k,l) = ry(1) + ry(2)     ! rho
-        q0(2,j,k,l) = 0.1d0         ! u
-        q0(3,j,k,l) = 0.0d0         ! v
-        q0(4,j,k,l) = -1.0d0*(tanh(const*( r -0.25d0)))         ! w
-        q0(5,j,k,l) = 0.9d0         ! p
-        q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
-      end do
-    end do
-  end do
-
-  return
-end subroutine contact_init_tangential2
-
-subroutine contact_init(q0)
-  use param
-  implicit none
-  integer j,k,l
-  double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
-  double precision, dimension(nspecies)   :: ry, ryw
-  double precision  r
-  double precision  xc, yc, zc,rc, const
-
-  r = 0d0
-  xc = 0.5d0
-  yc = 0.5d0
-  zc = 0.5d0
-  rc = 0.25d0
-
-  const = 20d0
-  ryw(1) = 0.6d0
-  ryw(2) = 0.2d0
-
-  ! contact 
-  do l=1,lmax
-    do k=1,kmax
-      do j=1,jmax
-        r = sqrt( (xg(j)- xc)**2 )
-        ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - rc)))
-        ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r - rc)))
-
-        q0(1,j,k,l) = ry(1) + ry(2)     ! rho
-        q0(2,j,k,l) = 1.0d0         ! u
-        q0(3,j,k,l) = 0.0d0         ! v
-        q0(4,j,k,l) = 0.0d0         ! w
-        q0(5,j,k,l) = 0.9d0         ! p
-        q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
-      end do
-    end do
-  end do
-
-  return
-end subroutine contact_init
-
-subroutine contact_init_sharp(q0)
+subroutine prin_init(q0)
   use param
   implicit none
   integer j,k,l
@@ -301,38 +277,31 @@ subroutine contact_init_sharp(q0)
   double precision  r
   double precision  xc, yc, zc, rc, const
 
+  r = 0d0
   xc = 0.5d0
   yc = 0.5d0
   zc = 0.5d0
-  rc = 0.25d0
+  rc =0.25d0
 
-
-  const = 5000d0
-  ! const = 50d0
-
-  ! *** T= Not const  *******
-  ! ryw(1) = 0.2d0
-  ! ryw(2) = 0.7d0
-  ! Ru = 200d0
-
-  ! *** T=const  *******
-  ryw(1) = 0.03d0*mwi(1)
-  ryw(2) = 0.03d0*mwi(2)
-  Ru = 1d0/0.03d0/ 1.1d0
-
+  const = 15d0
+  ryw(1) = 0.8d0
+  ryw(2) = 0.2d0
 
   ! contact 
   do l=1,lmax
     do k=1,kmax
       do j=1,jmax
-        r = sqrt( (xg(j)- xc)**2 )
+
+        r = sqrt( (xg(j)- xc)**2 + (yg(k)- yc)**2 + (zg(l)- zc)**2 )
         ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - rc)))
         ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r - rc)))
+        ! ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - rc))) + 0.2d0
+        ! ry(2) = 0d0
 
         q0(1,j,k,l) = ry(1) + ry(2)     ! rho
         q0(2,j,k,l) = 1.0d0         ! u
-        q0(3,j,k,l) = 0.0d0         ! v
-        q0(4,j,k,l) = 0.0d0         ! w
+        q0(3,j,k,l) = 1.0d0         ! v
+        q0(4,j,k,l) = 1.0d0         ! w
         q0(5,j,k,l) = 1.0d0         ! p
         q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
       end do
@@ -340,7 +309,7 @@ subroutine contact_init_sharp(q0)
   end do
 
   return
-end subroutine contact_init_sharp
+end subroutine prin_init
 
 subroutine prin_sharp_init(q0)
   use param
@@ -393,91 +362,6 @@ subroutine prin_sharp_init(q0)
   return
 end subroutine prin_sharp_init
 
-subroutine sod_init(q0)
-  use param
-  implicit none
-  integer j,k,l
-  double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
-  double precision, dimension(nspecies)   :: ry, ryw
-
-  ryw(1) = 1.0d0
-  ryw(2) = 0.0d0
-
-  ! contact 
-  do l=1,lmax
-    do k=1,kmax
-      do j=1,jmax
-        if(xg(j)<0.5d0) then
-          ry(1) = ryw(1)*1.0d0
-          ry(2) = ryw(2)*1.0d0
-
-          q0(1,j,k,l) = ry(1) + ry(2)     ! rho
-          q0(2,j,k,l) = 0.0d0         ! u
-          q0(3,j,k,l) = 0.0d0         ! v
-          q0(4,j,k,l) = 0.0d0         ! w
-          q0(5,j,k,l) = 1.0d0         ! p
-          q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
-        else
-          ry(1) = ryw(1)*0.125d0
-          ry(2) = ryw(2)*0.125d0
-
-          q0(1,j,k,l) = ry(1) + ry(2)     ! rho
-          q0(2,j,k,l) = 0.0d0         ! u
-          q0(3,j,k,l) = 0.0d0         ! v
-          q0(4,j,k,l) = 0.0d0         ! w
-          q0(5,j,k,l) = 0.1d0         ! p
-          q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
-        endif
-      end do
-    end do
-  end do
-
-  return
-end subroutine sod_init
-
-subroutine prin_init(q0)
-  use param
-  implicit none
-  integer j,k,l
-  double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
-  double precision, dimension(nspecies)   :: ry, ryw
-  double precision  r
-  double precision  xc, yc, zc, rc, const
-
-  r = 0d0
-  xc = 0.5d0
-  yc = 0.5d0
-  zc = 0.5d0
-  rc =0.25d0
-
-  const = 15d0
-  ryw(1) = 0.8d0
-  ryw(2) = 0.2d0
-
-  ! contact 
-  do l=1,lmax
-    do k=1,kmax
-      do j=1,jmax
-
-        r = sqrt( (xg(j)- xc)**2 + (yg(k)- yc)**2 + (zg(l)- zc)**2 )
-        ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - rc)))
-        ry(2) = 0.5d0*ryw(2)*(1d0 + tanh(const*( r - rc)))
-        ! ry(1) = 0.5d0*ryw(1)*(1d0 - tanh(const*( r - rc))) + 0.2d0
-        ! ry(2) = 0d0
-
-        q0(1,j,k,l) = ry(1) + ry(2)     ! rho
-        q0(2,j,k,l) = 1.0d0         ! u
-        q0(3,j,k,l) = 1.0d0         ! v
-        q0(4,j,k,l) = 1.0d0         ! w
-        q0(5,j,k,l) = 1.0d0         ! p
-        q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
-      end do
-    end do
-  end do
-
-  return
-end subroutine prin_init
-
 subroutine multiprin_init(q0)
   use param
   implicit none
@@ -520,6 +404,84 @@ subroutine multiprin_init(q0)
 
   return
 end subroutine multiprin_init
+
+subroutine sod_init(q0)
+  use param
+  implicit none
+  integer j,k,l
+  double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
+  double precision, dimension(nspecies)   :: ry, ryw
+
+  ryw(1) = 1.0d0
+  ryw(2) = 0.0d0
+
+  ! contact 
+  do l=1,lmax
+    do k=1,kmax
+      do j=1,jmax
+        if(xg(j)<0.5d0) then
+          ry(1) = ryw(1)*1.0d0
+          ry(2) = ryw(2)*1.0d0
+
+          q0(1,j,k,l) = ry(1) + ry(2)     ! rho
+          q0(2,j,k,l) = 0.0d0         ! u
+          q0(3,j,k,l) = 0.0d0         ! v
+          q0(4,j,k,l) = 0.0d0         ! w
+          q0(5,j,k,l) = 1.0d0         ! p
+          q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
+        else
+          ry(1) = ryw(1)*0.125d0
+          ry(2) = ryw(2)*0.125d0
+
+          q0(1,j,k,l) = ry(1) + ry(2)     ! rho
+          q0(2,j,k,l) = 0.0d0         ! u
+          q0(3,j,k,l) = 0.0d0         ! v
+          q0(4,j,k,l) = 0.0d0         ! w
+          q0(5,j,k,l) = 0.1d0         ! p
+          q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
+        endif
+      end do
+    end do
+  end do
+
+  return
+end subroutine sod_init
+
+subroutine TGV_init(q0)
+  use param
+  implicit none
+  integer j,k,l
+  double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
+  double precision, dimension(nspecies)   :: ry, ryw
+  double precision  rinf,pinf
+
+  Mach = 0.05d0
+  ryw(1) = 1.0d0
+  ryw(2) = 0.0d0
+
+  rinf = 1d0
+
+  do l=1,lmax
+    do k=1,kmax
+      do j=1,jmax
+
+        pinf = 1d0/(1d0/gam(j,k,l)+1d0)
+        ry(1) = ryw(1)*rinf
+        ry(2) = ryw(2)*rinf
+
+        q0(1,j,k,l) = ry(1) + ry(2)     ! rho
+        q0(2,j,k,l) = Mach*dsin(xg(j))*dcos(yg(k))*dcos(zg(l))   ! u
+        q0(3,j,k,l) = -Mach*dcos(xg(j))*dsin(yg(k))*dcos(zg(l))   ! v
+        q0(4,j,k,l) = 0d0   ! w
+        q0(5,j,k,l) = pinf+(rinf*Mach*Mach*(dcos(2.0d0*xg(j))+dcos(2.0d0*yg(k)))*(dcos(2.0d0*zg(l))+2d0))/16d0         ! p
+        q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
+
+      end do
+    end do
+  end do
+
+  return
+end subroutine TGV_init
 
 subroutine RMinstability_init(q0)
   use param

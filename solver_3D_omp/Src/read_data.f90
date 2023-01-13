@@ -24,6 +24,7 @@ subroutine read_stdin()
     read(5,*) acc
     read(5,*) ilhs
     read(5,*) vflag
+    read(5,*) dim_outf
     read(5,*) mconst
     read(5,*) bc1, bc2, bc3, bc4, bc5, bc6 
   close(5)
@@ -31,7 +32,7 @@ subroutine read_stdin()
   write(*,*) nmax,nout,restart,dt
   write(*,*) jmax, kmax, lmax
   write(*,*) Mach,Pr,Re
-  write(*,*) nspecies,irhs,acc,ilhs,vflag
+  write(*,*) nspecies,irhs,acc,ilhs,vflag,dim_outf
   write(*,*) bc1,bc2,bc3,bc4,bc5,bc6
 
   ndim  = 3
@@ -98,9 +99,8 @@ subroutine read_flow(q0)
 
     do l = 1, lmax
       do j = 1, jmax
+        !** please edit this line for the format of restart data 
         read (5, *) x, z, q0(:,j,2,l), g
-        ! write(*, fmt='(11E25.15e3)',advance='No') x, z, q0(:,j,2,l), g
-        ! write(*,*)
       end do
     end do
 

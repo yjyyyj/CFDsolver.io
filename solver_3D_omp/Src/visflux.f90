@@ -17,12 +17,12 @@ subroutine visflux_LAD(ql, qr, vf, fmu)
   double precision,dimension(ndim) :: u1,u2,u_fl
   integer,dimension(ndim) :: dl
 
-  diff(:) = 0.0005d0
-  diff = diff*vflag
 
   do n=1,ndim
     dl(:)=0
     dl(n)=1
+    ! diff(:) = 0.005d0/dx(n)
+    diff(:) = 0.5d0
     !$OMP parallel do default(none) &
     !$OMP & firstprivate(dl,n) &
     !$OMP & shared(vf,ql,qr,diff,jmax,kmax,lmax,ndmax) &
@@ -67,29 +67,29 @@ subroutine visflux_LAD(ql, qr, vf, fmu)
           kbar = 0.5d0*(k1 + k2)
           
           !****** mass diff ********************************* 
-          j_fl(:)  = 0.5d0*diff(:)*(phi2(:) - phi1(:))/dx(n) ! nabla phi_i
+          j_fl(:)  = 0.5d0*diff(:)*(phi2(:) - phi1(:)) ! nabla phi_i
           rj_fl(:) = 0.5d0*(r2/m2*mwi(:) + r1/m1*mwi(:))*j_fl(:) ! rho_i|_{j+1/2} j_i|_{j+1/2}
 
-          ! grad_y(:) = 0.5d0*(ry2(:)/r2 - ry1(:)/r1)/dx(n)  
-          ! rj_fl(:) = r_fl*diff(:)*grad_y(:) - 0.5d0*(ry2(:)/r2 + ry1(:)/r1)*sum(r_fl*diff*grad_y(:))   
+          ! grad_y(:) = 0.5d0*(ry2(:)/r2 - ry1(:)/r1)  
+          ! rj_fl(:) = r_fl*diff(:)*grad_y(:) - 0.5d0*(ry2(:)/r2 + ry1(:)/r1)*sum(r_fl*diff*grad_y(:))  ! Cook, 2007 
           
-          ! rj_fl(:) = 0.5d0*(r1+r2) * 0.5d0*diff(:)*(ry2(:)/r2 - ry1(:)/r1)/dx ! rho|_{j+1/2} Y_i|_{j+1/2}
+          ! rj_fl(:) = 0.5d0*(r1+r2) * 0.5d0*diff(:)*(ry2(:)/r2 - ry1(:)/r1) ! rho|_{j+1/2} Y_i|_{j+1/2}
 
-          ! rj_fl(:) = 0.5d0*diff(:)*(ry2(:) - ry1(:))/dx(n)   ! nabla rhoY_i
-          ! rj_fl(:) = 0.5d0*(r2/m2*mwi(:) + r1/m1*mwi(:))*j_fl(:) - 0.5d0*diff(:)*(ry2(:) - ry1(:))/dx(n)  ! rho_i|_{j+1/2} j_i|_{j+1/2} - nabla rhoY_i
+          ! rj_fl(:) = 0.5d0*diff(:)*(ry2(:) - ry1(:))   ! nabla rhoY_i
+          ! rj_fl(:) = 0.5d0*(r2/m2*mwi(:) + r1/m1*mwi(:))*j_fl(:) - 0.5d0*diff(:)*(ry2(:) - ry1(:))  ! rho_i|_{j+1/2} j_i|_{j+1/2} - nabla rhoY_i
 
           r_fl = sum(rj_fl(:))
           
           !****** enthalpy diff ********************************* 
-          ! h1(:) = p1*(m1/r1)*(gami(:)/mwi(:) + 1d0/mwi(:)) ! Y_i base
-          ! h2(:) = p2*(m2/r2)*(gami(:)/mwi(:) + 1d0/mwi(:)) ! Y_i base
-          ! hjbar = sum(0.5d0*(h2(:) + h1(:)) * rj_fl(:)) ! H_i|_12 = h_i|_12*J_i|_12
+          h1(:) = p1*(m1/r1)*(gami(:)/mwi(:) + 1d0/mwi(:)) ! Y_i base
+          h2(:) = p2*(m2/r2)*(gami(:)/mwi(:) + 1d0/mwi(:)) ! Y_i base
+          hjbar = sum(0.5d0*(h2(:) + h1(:)) * rj_fl(:)) ! H_i|_12 = h_i|_12*J_i|_12
 
           ! h1(:) = p1*gami(:) + p1 ! phi_i base
           ! h2(:) = p2*gami(:) + p2 ! phi_i base
           ! hjbar = sum( 0.5d0*(h2(:) + h1(:))*j_fl(:) ) ! H_i|_12 = rho_i h_i|_12*j_i|_12
 
-          hjbar = 0.5d0*pbar*diff(1)*(g2 - g1)/dx(n)
+          ! hjbar = 0.5d0*pbar*diff(1)*(g2 - g1) ! T=const
 
           !****** construct flux ********************************* 
           vf(1,j,k,l,n) = 0.d0

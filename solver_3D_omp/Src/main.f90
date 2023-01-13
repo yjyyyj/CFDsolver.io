@@ -16,13 +16,16 @@ program main
   allocate( q0(ndmax,jmax,kmax,lmax) )
   allocate( qc(ndmax,jmax,kmax,lmax) )
 
-  !***** prepare calc ******************************************************!
+  !***** prepare calclation ******************************************************!
 
-  call init_flow(q, q0, qc)
+  !*** select subroutine 
   call myscheme%select_step(ilhs)
   call myscheme%select_muscl(acc)
   call myscheme%select_flux(irhs)
   call myscheme%select_visflux(vflag)
+  call myscheme%select_outf(dim_outf)
+
+  call init_flow(q, q0, qc, myscheme)
 
   !***** main loop *****************************************************!
 
@@ -30,10 +33,8 @@ program main
     call myscheme%calc_step(q, qc, myscheme)
     if(mod(n,nout)==0) then
       call sumdf(qc, n)
-      ! call residual(n)
-      ! call outf(q, n)
-      call outf_slice(q, n)
-      ! call outf_1d(q, n)
+      call residual(n)
+      call myscheme%calc_outf(q,n)
     endif
   enddo
 
