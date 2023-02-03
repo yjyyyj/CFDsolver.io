@@ -6,12 +6,13 @@ range_min=-1e-2
 range_max= 1e-3
 fname0 = "output_000000.dat"
 fname1 = "output_000000.dat"
-# fname1 = "output_000001.dat"
-# fname1 = "output_000010.dat"
-# fname1 = "output_000050.dat"
-# fname1 = "output_000100.dat"
-# fname1 = "output_001000.dat"
-# fname1 = "output_010000.dat"
+fname1 = "output_000001.dat"
+fname1 = "output_000010.dat"
+fname1 = "output_000050.dat"
+fname1 = "output_000100.dat"
+fname1 = "output_001000.dat"
+fname1 = "output_010000.dat"
+fname1 = "output_100000.dat"
 # fname1 = "output_500000.dat"
 
 # global settings

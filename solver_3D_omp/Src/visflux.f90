@@ -10,7 +10,8 @@ subroutine visflux_LAD(ql, qr, vf, fmu)
   double precision :: fmu           ! viscous coefficient
   double precision r1,r2,p1,p2,k1,k2,e1,e2
   double precision m1,m2,g1,g2
-  double precision r_fl,pbar,kbar,hjbar
+  double precision T1,T2
+  double precision r_fl,pbar,kbar,hjbar,qheat_bar
   double precision,dimension(nspecies) :: ry1,ry2,h1,h2,phi1,phi2
   double precision,dimension(nspecies) :: rj_fl,j_fl
   double precision,dimension(nspecies) :: grad_y,diff
@@ -26,9 +27,9 @@ subroutine visflux_LAD(ql, qr, vf, fmu)
     !$OMP parallel do default(none) &
     !$OMP & firstprivate(dl,n) &
     !$OMP & shared(vf,ql,qr,diff,jmax,kmax,lmax,ndmax) &
-    !$OMP & shared(dx,gami,mwi) &
-    !$OMP & private(r1,r2,p1,p2,k1,k2,e1,e2,m1,m2,g1,g2) & 
-    !$OMP & private(r_fl,pbar,kbar,hjbar) & 
+    !$OMP & shared(dx,gami,mwi,Ru) &
+    !$OMP & private(r1,r2,p1,p2,k1,k2,e1,e2,m1,m2,g1,g2,T1,T2) & 
+    !$OMP & private(r_fl,pbar,kbar,hjbar,qheat_bar) & 
     !$OMP & private(ry1,ry2,h1,h2,phi1,phi2,u1,u2,u_fl,rj_fl,j_fl,grad_y) 
     do l=0,lmax
       do k=0,kmax
@@ -76,7 +77,6 @@ subroutine visflux_LAD(ql, qr, vf, fmu)
           ! rj_fl(:) = 0.5d0*(r1+r2) * 0.5d0*diff(:)*(ry2(:)/r2 - ry1(:)/r1) ! rho|_{j+1/2} Y_i|_{j+1/2}
 
           ! rj_fl(:) = 0.5d0*diff(:)*(ry2(:) - ry1(:))   ! nabla rhoY_i
-          ! rj_fl(:) = 0.5d0*(r2/m2*mwi(:) + r1/m1*mwi(:))*j_fl(:) - 0.5d0*diff(:)*(ry2(:) - ry1(:))  ! rho_i|_{j+1/2} j_i|_{j+1/2} - nabla rhoY_i
 
           r_fl = sum(rj_fl(:))
           
@@ -88,15 +88,20 @@ subroutine visflux_LAD(ql, qr, vf, fmu)
           ! h1(:) = p1*gami(:) + p1 ! phi_i base
           ! h2(:) = p2*gami(:) + p2 ! phi_i base
           ! hjbar = sum( 0.5d0*(h2(:) + h1(:))*j_fl(:) ) ! H_i|_12 = rho_i h_i|_12*j_i|_12
-
+          
           ! hjbar = 0.5d0*pbar*diff(1)*(g2 - g1) ! T=const
+
+          !****** heat diff flux ********************************* 
+          T1 = p1/Ru*m1/r1
+          T2 = p2/Ru*m2/r2
+          qheat_bar = 0.5d0*10d0*diff(1)*(T2 - T1) ! q = d(k dT)
 
           !****** construct flux ********************************* 
           vf(1,j,k,l,n) = 0.d0
           vf(2,j,k,l,n) = r_fl*u_fl(1)*dl(n)
           vf(3,j,k,l,n) = r_fl*u_fl(2)*dl(n)
           vf(4,j,k,l,n) = r_fl*u_fl(3)*dl(n)
-          vf(5,j,k,l,n) = r_fl*kbar*dl(n) + hjbar*dl(n)
+          vf(5,j,k,l,n) = r_fl*kbar*dl(n) + hjbar*dl(n) + qheat_bar*dl(n)
           vf(6:ndmax,j,k,l,n) = rj_fl(:)*dl(n)
 
         end do
