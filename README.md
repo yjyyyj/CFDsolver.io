@@ -1,5 +1,5 @@
 # Compressible multi-component flow solver 
-(latest edit 2022/12/07 fujiwara)
+(latest edit 2023/02/03 fujiwara)
 
 <!--(Comment out）-->
 <!--(以下マークダウン記法の基本）
@@ -12,35 +12,31 @@
 ___   : split line
 -->
 
-<!--
-[![MemoTube](https://user-images.githubusercontent.com/28818747/98420702-13594700-20cb-11eb-9268-8c304fdb7cb2.png)](https://tohoku.memotube.xyz)<br/><br/>
--->
-
 ## How to use
 1. Compiling source files
 
-    Excute the following command in `solver_omp/Src/`.
+    Excute the following command in `solver_3D_omp/Src/`.
     ```html:sample
        make
     ```
-    The executor file `job.out` is generated in `solver_omp/Src/`.
+    The executor file `job.out` is generated in `solver_3D_omp/Src/`.
 
 2. Setting simulation parameters
 
-    Edit the input file `stdin` in `solver_omp/`.
+    Edit the input file `stdin` in `solver_3D_omp/`.
     The meanings of each params are written [below](#stdin).
 
 3. Start calculation
 
-    Excute the following command in `solver_omp/`.
+    Excute the following command in `solver_3D_omp/`.
     ```html:sample
        ./job.out
     ```
     
 4. Result
 
-    The calculation results are output to files `output.*******.dat` in `solver_omp/`.
-    You can visilize the results with `plot_*****.py` in `solver_omp/plots/`.
+    The calculation results are output to files `output.*******.dat` in `solver_3D_omp/`.
+    You can visilize the results with `plot_*****.py` in `solver_3D_omp/plots/`.
     
 ## Code preview
 ### stdin
@@ -61,4 +57,4 @@ ___   : split line
 
 ### modules
 - scheme.f90
-- module.f90
+- param.f90
