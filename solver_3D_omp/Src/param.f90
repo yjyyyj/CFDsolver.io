@@ -14,8 +14,8 @@ module param
   double precision :: Re
   double precision :: Pr
 
-  double precision,allocatable,dimension(:) :: gami
-  double precision,allocatable,dimension(:) :: mwi 
+  double precision,dimension(5) :: gami
+  double precision,dimension(5) :: mwi 
   double precision,allocatable,dimension(:,:,:) :: gam
   double precision,allocatable,dimension(:,:,:) :: mw 
   

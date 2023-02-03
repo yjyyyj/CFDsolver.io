@@ -21,7 +21,6 @@ subroutine init_flow(q, q0, qc, myscheme)
 
   z0 = 0.0d0
   z1 = 1.0d0
-  ! z1 = 5d0
 
   q = 0.0d0
   q0 = 0.0d0
@@ -128,7 +127,7 @@ subroutine nonDimtize(q0)
   q0(1,:,:,:) = q0(1,:,:,:)/rinf     ! rho
   q0(2,:,:,:) = q0(2,:,:,:)/ainf     ! u
   q0(3,:,:,:) = q0(3,:,:,:)/ainf     ! v
-  q0(4,:,:,:) = q0(4,:,:,:)/ainf     ! v
+  q0(4,:,:,:) = q0(4,:,:,:)/ainf     ! w
   q0(5,:,:,:) = q0(5,:,:,:)/(rinf*ainf*ainf)    ! p
   q0(6:ndmax,:,:,:) = q0(6:ndmax,:,:,:)/rinf    ! rhoy
 
@@ -154,7 +153,7 @@ subroutine contact_init(q0)
   zc = 0.5d0
   rc = 0.25d0
 
-  const = 100d0
+  const = 20d0
   ryw(1) = 0.6d0
   ryw(2) = 0.2d0
 
@@ -170,7 +169,7 @@ subroutine contact_init(q0)
         q0(2,j,k,l) = 1.0d0         ! u
         q0(3,j,k,l) = 0.0d0         ! v
         q0(4,j,k,l) = 0.0d0         ! w
-        q0(5,j,k,l) = 0.95d0         ! p
+        q0(5,j,k,l) = 0.9d0         ! p
         q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
       end do
     end do

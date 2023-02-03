@@ -47,25 +47,23 @@ subroutine read_stdin()
   allocate( sums0(ndmax) )
   allocate( resid(ndmax) )
   allocate( qinf(ndmax) )
-  allocate( gam(0:(jmax+1),0:(kmax+1),0:(lmax+1)), mw(0:(jmax+1),0:(kmax+1),0:(lmax+1)), gami(nspecies), mwi(nspecies) )
+  allocate( gam(0:(jmax+1),0:(kmax+1),0:(lmax+1)), mw(0:(jmax+1),0:(kmax+1),0:(lmax+1)))
 
   ! set const param
   pi = 4.0d0*atan(1.0d0)
   Ru = 8.3d0 ! 
 
-  ! gami(1)  = 1.4d0        ! specific heat ratio # N2
-  ! gami(2)  = 1.09d0        ! specific heat ratio # SF6
   gami(1)  = 1.4d0        ! specific heat ratio # N2
   gami(2)  = 1.66d0        ! specific heat ratio # He
-  ! gami(3)  = 1.29d0        ! specific heat ratio # CO2
-  ! gami(4)  = 1.31d0        ! specific heat ratio # CH4
+  gami(3)  = 1.29d0        ! specific heat ratio # CO2
+  gami(4)  = 1.31d0        ! specific heat ratio # CH4
+  gami(5)  = 1.09d0        ! specific heat ratio # SF6
 
-  ! mwi(1)  = 28.8d0        ! specific heat ratio
-  ! mwi(2)  = 146.0d0      ! specific heat ratio
   mwi(1)  = 28.d0        ! specific heat ratio
   mwi(2)  = 4.0d0        ! specific heat ratio
-  ! mwi(3)  = 44.d0        ! specific heat ratio
-  ! mwi(4)  = 16.d0        ! specific heat ratio
+  mwi(3)  = 44.d0        ! specific heat ratio
+  mwi(4)  = 16.d0        ! specific heat ratio
+  mwi(5)  = 146.0d0      ! specific heat ratio
 
   if(mconst == 1) then 
     mwi(:)  = 1.d0        ! specific heat ratio
