@@ -82,7 +82,7 @@ ___   : split line
 
 - dim_outf 
 
-Select output data type defiend at `outf.f90`. 
+    Select output data type defiend at `outf.f90`. 
 
 ### Source
 - main.f90
