@@ -50,8 +50,9 @@ subroutine init_flow(q, q0, qc, myscheme)
   !*** make inital flow ********************
   !**** call init-field subroutine 
 
+  call unform_init(q0)
   ! call contact_init(q0)
-  call contact_init_sharp(q0)
+  ! call contact_init_sharp(q0) 
   ! call contact_init_tangential(q0)
   ! call prin_init(q0)
   ! call prin_sharp_init(q0)
@@ -137,6 +138,37 @@ end subroutine nonDimtize
 !**********************************************************************
 !*     generate flow fields subroutines                               *
 !**********************************************************************
+
+subroutine unform_init(q0)
+  use param
+  implicit none
+  integer j,k,l
+  double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
+  double precision, dimension(nspecies)   :: ry, ryw
+
+  ryw(1) = 1.0d0
+  ryw(2) = 0.0d0
+
+  ! contact 
+  do l=1,lmax
+    do k=1,kmax
+      do j=1,jmax
+        ry(1) = 1.0d0*ryw(1)
+        ry(2) = 0.0d0*ryw(2)
+
+        q0(1,j,k,l) = ry(1) + ry(2)     ! rho
+        q0(2,j,k,l) = 1.0d0         ! u
+        q0(3,j,k,l) = 0.0d0         ! v
+        q0(4,j,k,l) = 0.0d0         ! w
+        q0(5,j,k,l) = 1.0d0         ! p
+        q0(6:ndmax,j,k,l) = ry(:)   ! rhoy
+      end do
+    end do
+  end do
+
+  return
+end subroutine unform_init
+
 
 subroutine contact_init(q0)
   use param
