@@ -49,8 +49,9 @@ contains
             write(*,*) "SLAU"
             self%calc_flux => flux_slau
         case(4)
-            write(*,*) "KEEP_PE"
-            self%calc_flux => flux_KEEP_PE
+            write(*,*) "KEEP"
+            self%calc_flux => flux_KEEP
+            ! self%calc_flux => flux_KEEP_PE
         case(5)
             write(*,*) "Proposed"
             self%calc_flux => flux_proposed

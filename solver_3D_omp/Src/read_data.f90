@@ -53,7 +53,7 @@ subroutine read_stdin()
   pi = 4.0d0*atan(1.0d0)
   Ru = 8.3d0 ! 
 
-  gami(1)  = 1.4d0        ! specific heat ratio # N2
+  gami(1)  = 1.4d0         ! specific heat ratio # N2
   gami(2)  = 1.66d0        ! specific heat ratio # He
   gami(3)  = 1.29d0        ! specific heat ratio # CO2
   gami(4)  = 1.31d0        ! specific heat ratio # CH4

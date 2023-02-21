@@ -144,7 +144,7 @@ end subroutine flux_upwind
 
 subroutine flux_roe(ql, qr, f)
   !**********************************************************************
-  !*     caluculate invicid flux in 1st Roe scheme                      *
+  !*     caluculate invicid flux in 1st Roe scheme (insufficient)       *
   !**********************************************************************
   use param
   implicit none

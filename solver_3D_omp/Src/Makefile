@@ -1,16 +1,11 @@
 MARK = 4
 FC  = gfortran
 #FC=ifort
-# DEBUG = -Wall -fbounds-check -Wuninitialized -ffpe-trap=invalid,zero,overflow,underflow,denormal -fbacktrace -g
-DEBUG = -Wall -fbounds-check -Wuninitialized -ffpe-trap=invalid,zero,denormal -fbacktrace -g  # removed (overflow,underflow)
+DEBUG = -Wall -fbounds-check -Wuninitialized -ffpe-trap=invalid,zero,denormal -fbacktrace -g 
 OPT = -O3
 # OPT = -O ${DEBUG}
 LDFLAGS = -fopenmp
 FFLAGS =-fconvert=little-endian  -frecord-marker=${MARK} ${LDFLAGS} ${OPT}
-# FFLAGS =-fconvert=little-endian  -frecord-marker=${MARK} ${OPT}
-# FFLAGS =-fconvert=big-endian -frecord-marker=${MARK} ${LDFLAGS} ${OPT}
-
-# FFLAGS2=${FFLAGS}
 
 OBJS = param.o flux.o scheme.o main.o outf.o init.o  bc.o sumdf.o muscl.o step.o visflux.o read_data.o
 PROGRAM = ../job.out

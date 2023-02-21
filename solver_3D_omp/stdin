@@ -1,4 +1,4 @@
-80000           : iter
+100000           : iter
 1000             : nout
 0                : restart( 0: init calc, 1: restart flow data) -> memo : "from ~~ step"
 101,3,3          : jmax, kmax, lmax
