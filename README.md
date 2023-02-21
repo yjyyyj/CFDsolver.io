@@ -42,22 +42,22 @@ ___   : split line
 
 ### stdin
 ```html:sample
-    100000           : iter <br/> 
-    1000             : nout <br/> 
-    0                : restart( 0: init calc, 1: restart flow data) -> memo : "from ~~ step" <br/> 
-    101,3,3          : jmax, kmax, lmax <br/> 
-    1.0d-4           : dt <br/> 
-    1.0d0            : Mach number (Mach)  <br/> 
-    0.7d0            : Prandtl number (Pr)  <br/> 
-    100              : Reynolds number (Re) <br/> 
-    2                : num species <br/> 
-    5                : rhs (1:divergence, 2:upwind, 3:slau, 4:KEEP, 5:proposed ...) <br/> 
-    0                : muscl (1:use, 0:not)<br/> 
-    2                : lhs (1:1steuler, 2:RK4 )<br/> 
-    0                : vflag (0:Euler , 1:Euler + LAD, 2:physical NS (in progress)) <br/> 
-    1                : dim_outf (1:1D -> j, 2:2D -> j,k, 3:3D -> j,k,l)<br/> 
-    0                : mconst (1:Molculer weight const, 0:not)  <br/> 
-    3,3,3,3,3,3      : boundary condition ( 1:outflow, 2:inflow, 3,periodic )<br/> 
+    100000           : iter  
+    1000             : nout  
+    0                : restart( 0: init calc, 1: restart flow data) -> memo : "from ~~ step" 
+    101,3,3          : jmax, kmax, lmax 
+    1.0d-4           : dt 
+    1.0d0            : Mach number (Mach)   
+    0.7d0            : Prandtl number (Pr)   
+    100              : Reynolds number (Re) 
+    2                : num species 
+    5                : rhs (1:divergence, 2:upwind, 3:slau, 4:KEEP, 5:proposed ...) 
+    0                : muscl (1:use, 0:not)
+    2                : lhs (1:1steuler, 2:RK4 ) 
+    0                : vflag (0:Euler , 1:Euler + LAD, 2:physical NS (in progress)) 
+    1                : dim_outf (1:1D -> j, 2:2D -> j,k, 3:3D -> j,k,l)
+    0                : mconst (1:Molculer weight const, 0:not)  
+    3,3,3,3,3,3      : boundary condition ( 1:outflow, 2:inflow, 3,periodic )
 ```
 
 - num species
