@@ -44,20 +44,20 @@ ___   : split line
 - example 
     100000           : iter
     1000             : nout
-    0                : restart( 0: init calc, 1: restart flow data) -> memo : "from ~~ step"
+    0                : restart( 0: init calc, 1: restart flow data -> "flow.dat") -> memo : step
     101,3,3          : jmax, kmax, lmax
     1.0d-4           : dt
     1.0d0            : Mach number (Mach) 
     0.7d0            : Prandtl number (Pr) 
     100              : Reynolds number (Re)
-    2                : num species
-    5                : rhs (1:divergence, 2:upwind, 3:slau, 4:KEEP, 5:proposed ...)
-    0                : muscl (1:use, 0:not)
-    2                : lhs (1:1steuler, 2:RK4 )
-    0                : vflag (0:Euler , 1:Euler + LAD, 2:physical NS (in progress)) 
+    2                : number of species (i=1,2,....N)
+    5                : rhs (1:divergence, 2:upwind, 3:slau, 4:KEEP, 5:KEEP_PE, 6:Proposed(sp), 7:Proposed(div), ...)
+    0                : muscl (0:not use, 1:use -> only when using upwind )
+    2                : lhs (1:1steuler, 2:RK4, 3:TVDRK3 )
+    0                : vflag (0:Euler, 1:Euler + numerical diffusion, 2:physical NS (in progress)) 
     1                : dim_outf (1:1D -> j, 2:2D -> j,k, 3:3D -> j,k,l)
     0                : mconst (1:Molculer weight const, 0:not)  
-    3,3,3,3,3,3      : boundary condition ( 1:outflow, 2:inflow, 3,periodic )
+    3,3,3,3,3,3      : boundary condition (jin, jout, kin, kout, lin, lout, -> 1:outflow, 2:inflow, 3,periodic )
 
 - num species
     Define the number of gas species.
@@ -67,7 +67,7 @@ ___   : split line
     Select the numerical flux used at the advection term in the right hand side.
     You can edit & add schemes in `scheme.f90`.
 - muscl 
-    Switch MUSCL scheme flag for high order accuration. 
+    Switch MUSCL scheme flag for high order accuration at the cell faces. 
     MUSCL is only used when use upwind schemes.
 - vflag 
     Select the evaluation of the viscous term. 
@@ -77,15 +77,25 @@ ___   : split line
 ### Source
 - main.f90
 - read_data.f90
+    Read `stdin` & `flow.dat`.
 - init.f90
+    Set initial flow fields.
 - step.f90
+    Caluclate time stepping in explicit schemes.
 - bc.f90
 - flux.f90
 - visflux.f90
 - muscl.f90
+    Calculate the right and left primitive `ql` & `qr` at the cell face.
 - outf.f90
-- sumdf.f90
+    Output flow fields in ASCII format.
+- sumqc.f90
+    Output the conservation error (`sums.dat`) & the `residual.dat`.
 
 ### modules
 - scheme.f90
+    Define using subroutines in the scheme.
+    `select_hoge()` is setting subroutine function to `calc_hoge()`.
+    `calc_hoge()` is excution subroutine in the defined scheme.
 - param.f90
+    Define often used parameters & functions.

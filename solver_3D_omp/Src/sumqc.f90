@@ -1,8 +1,8 @@
-subroutine sumdf_init(qc)
+subroutine sumqc_init(qc)
   !**********************************************************************
-  !*     initialize output data format                                  *
+  !*     initialize output summation data format                        *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: qc
@@ -28,13 +28,13 @@ subroutine sumdf_init(qc)
 
   return
 
-end subroutine sumdf_init
+end subroutine sumqc_init
 
-subroutine sumdf(qc, n)
+subroutine sumqc(qc, n)
   !**********************************************************************
   !*     output QC summation data                                       *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision, dimension(ndmax) :: sums
@@ -55,18 +55,17 @@ subroutine sumdf(qc, n)
 
   open(150,file="sums.dat",form="formatted",position='append')
     write(150,fmt='(I8, 9E20.10e3)',advance='No') n, sums
-    ! write(*,fmt='(I8, 9E20.10e3)') n, sums
   close(150)
 
   return
 
-end subroutine sumdf
+end subroutine sumqc
 
 subroutine residual_init()
   !**********************************************************************
-  !*     initialize output data format                                  *
+  !*     initialize output residual data format                         *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
 
   resid = 0d0
@@ -83,7 +82,7 @@ subroutine residual(n)
   !**********************************************************************
   !*     output residual data                                           *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer n
 

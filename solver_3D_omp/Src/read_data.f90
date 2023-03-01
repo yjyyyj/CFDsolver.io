@@ -2,14 +2,14 @@ subroutine read_stdin()
   !**********************************************************************
   !*     read parameters from stdin                                     *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer i
 
   !*** set param from stdin ********************
 
   ! read param 
-  write(*,*) "reading stdin"
+  write(*,*) "****** start reading stdin ******"
   open(5, file='stdin') 
     read(5,*) nmax
     read(5,*) nout
@@ -21,7 +21,7 @@ subroutine read_stdin()
     read(5,*) Re
     read(5,*) nspecies
     read(5,*) irhs
-    read(5,*) acc
+    read(5,*) faceAcc
     read(5,*) ilhs
     read(5,*) vflag
     read(5,*) dim_outf
@@ -32,7 +32,7 @@ subroutine read_stdin()
   write(*,*) nmax,nout,restart,dt
   write(*,*) jmax, kmax, lmax
   write(*,*) Mach,Pr,Re
-  write(*,*) nspecies,irhs,acc,ilhs,vflag,dim_outf
+  write(*,*) nspecies,irhs,faceAcc,ilhs,vflag,dim_outf
   write(*,*) bc1,bc2,bc3,bc4,bc5,bc6
 
   ndim  = 3
@@ -73,7 +73,7 @@ subroutine read_stdin()
     gami(i)  = 1d0/(gami(i) -1d0)        ! inv specific heat ratio
   enddo
 
-  write(*,*) "read stdin"
+  write(*,*) "****** read stdin fin *******"
 
   return
 end subroutine read_stdin
@@ -83,7 +83,7 @@ subroutine read_flow(q0)
   !**********************************************************************
   !*     read flow data from restart file (flow.dat)                    *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   double precision x,z,g
   integer j,k,l

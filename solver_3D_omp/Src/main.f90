@@ -2,7 +2,7 @@ program main
 	!******************************************************************
   !*     3D multi-species Euler Solver                              *
   !******************************************************************
-  use param
+  use param_mod
   use scheme_mod
 
   implicit none
@@ -18,9 +18,9 @@ program main
 
   !***** prepare calclation ******************************************************!
 
-  !*** select subroutine 
+  !*** select scheme subroutine->  myscheme%calc_"hoge"
   call myscheme%select_step(ilhs)
-  call myscheme%select_muscl(acc)
+  call myscheme%select_faceQ(faceAcc)
   call myscheme%select_flux(irhs)
   call myscheme%select_visflux(vflag)
   call myscheme%select_outf(dim_outf)
@@ -28,11 +28,12 @@ program main
   call init_flow(q, q0, qc, myscheme)
 
   !***** main loop *****************************************************!
+  write(*,*) "********* start main loop *********"
 
   do n=1,nmax
     call myscheme%calc_step(q, qc, myscheme)
     if(mod(n,nout)==0) then
-      call sumdf(qc, n)
+      call sumqc(qc, n)
       call residual(n)
       call myscheme%calc_outf(q,n)
     endif

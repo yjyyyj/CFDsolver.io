@@ -2,7 +2,7 @@ subroutine outf_3d(q, n)
   !**********************************************************************
   !*     output Q data in 3D                                            *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision :: temp
@@ -33,7 +33,7 @@ subroutine outf_2d(q, n)
   !**********************************************************************
   !*     output Q data in 2D slice                                      *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision:: temp
@@ -64,7 +64,7 @@ subroutine outf_1d(q, n)
   !**********************************************************************
   !*     output Q data in 1D                                            *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision, dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1)) :: q
@@ -93,7 +93,7 @@ subroutine outf_3d_init(q)
   !**********************************************************************
   !*     initialize output data format                                  *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision :: temp
@@ -122,7 +122,7 @@ subroutine outf_2d_init(q)
   !**********************************************************************
   !*     initialize output data format                                  *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision:: temp
@@ -139,7 +139,6 @@ subroutine outf_2d_init(q)
     end do
     write(100,*)
   end do
-
   close(100)
 
   return
@@ -150,7 +149,7 @@ subroutine outf_1d_init(q)
   !**********************************************************************
   !*     initialize output data format                                  *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1)) :: q

@@ -2,7 +2,7 @@ subroutine init_flow(q, q0, qc, myscheme)
   !**********************************************************************
   !*     initialize flow fields                                         *
   !**********************************************************************
-  use param
+  use param_mod
   use scheme_mod
 
   implicit none
@@ -13,6 +13,11 @@ subroutine init_flow(q, q0, qc, myscheme)
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0, qc
   type(scheme) :: myscheme
 
+  q = 0.0d0
+  q0 = 0.0d0
+  qc = 0.0d0
+
+  ! *** set calc region
   x0 = 0.0d0
   x1 = 1.0d0
 
@@ -22,19 +27,15 @@ subroutine init_flow(q, q0, qc, myscheme)
   z0 = 0.0d0
   z1 = 1.0d0
 
-  q = 0.0d0
-  q0 = 0.0d0
-  qc = 0.0d0
-
   dx(1) = (x1 - x0)/ (jmax-1)
   dx(2) = (y1 - y0)/ (kmax-1)
   dx(3) = (z1 - z0)/ (lmax-1) 
 
-  write(*,*) "dx  : ", dx(1)
-  write(*,*) "dy  : ", dx(2)
-  write(*,*) "dz  : ", dx(3)
-  write(*,*) "dt  : ", dt
-  write(*,*) "cfl : ", dt/dx(1)
+  write(*,*) "dx        : ", dx(1)
+  write(*,*) "dy        : ", dx(2)
+  write(*,*) "dz        : ", dx(3)
+  write(*,*) "dt        : ", dt
+  write(*,*) "cfl       : ", dt/min(dx(1),dx(2),dx(3))
 
   do j=1,jmax
     xg(j) = dble(j-1)*dx(1)
@@ -44,14 +45,13 @@ subroutine init_flow(q, q0, qc, myscheme)
   end do
   do l=1,lmax
     zg(l) = dble(l-1)*dx(3)
-    ! zg(l) = dble(l-1)*dx(3) + 0.5d0*dx(3)
   end do
 
   !*** make inital flow ********************
   !**** call init-field subroutine 
 
-  call unform_init(q0)
-  ! call contact_init(q0)
+  ! call unform_init(q0)
+  call contact_init(q0)
   ! call contact_init_sharp(q0) 
   ! call contact_init_tangential(q0)
   ! call prin_init(q0)
@@ -91,11 +91,11 @@ subroutine init_flow(q, q0, qc, myscheme)
 
   ! ***************************************
 
-  call sumdf_init(qc)
+  call sumqc_init(qc)
   call residual_init()
   call myscheme%calc_outf_init(q)
 
-  write(*,*) "set init"
+  write(*,*) "****** set init field fin ******"
 
   !$omp parallel
   write(*,*) "I am parallelized"
@@ -105,7 +105,7 @@ subroutine init_flow(q, q0, qc, myscheme)
 end subroutine init_flow
 
 subroutine nonDimtize(q0)
-  use param
+  use param_mod
   implicit none
   double precision, dimension(ndmax,jmax,kmax,kmax) :: q0
   double precision  gamma
@@ -140,7 +140,7 @@ end subroutine nonDimtize
 !**********************************************************************
 
 subroutine unform_init(q0)
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
@@ -171,7 +171,7 @@ end subroutine unform_init
 
 
 subroutine contact_init(q0)
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
@@ -211,7 +211,7 @@ subroutine contact_init(q0)
 end subroutine contact_init
 
 subroutine contact_init_sharp(q0)
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
@@ -261,7 +261,7 @@ subroutine contact_init_sharp(q0)
 end subroutine contact_init_sharp
 
 subroutine contact_init_tangential_V(q0)
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
@@ -300,7 +300,7 @@ subroutine contact_init_tangential_V(q0)
 end subroutine contact_init_tangential_V
 
 subroutine prin_init(q0)
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
@@ -343,7 +343,7 @@ subroutine prin_init(q0)
 end subroutine prin_init
 
 subroutine prin_sharp_init(q0)
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
@@ -394,7 +394,7 @@ subroutine prin_sharp_init(q0)
 end subroutine prin_sharp_init
 
 subroutine multiprin_init(q0)
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
@@ -437,7 +437,7 @@ subroutine multiprin_init(q0)
 end subroutine multiprin_init
 
 subroutine sod_init(q0)
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
@@ -479,7 +479,7 @@ subroutine sod_init(q0)
 end subroutine sod_init
 
 subroutine TGV_init(q0)
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0
@@ -515,7 +515,7 @@ subroutine TGV_init(q0)
 end subroutine TGV_init
 
 subroutine RMinstability_init(q0)
-  use param
+  use param_mod
   implicit none
   integer j,k
   double precision, dimension(ndmax,jmax,kmax) :: q0
@@ -579,7 +579,7 @@ subroutine RMinstability_init(q0)
 end subroutine RMinstability_init
 
 subroutine RTI_init(q0)
-  use param
+  use param_mod
   implicit none
   integer j,k
   double precision, dimension(ndmax,jmax,kmax) :: q0
@@ -638,7 +638,7 @@ subroutine RTI_init(q0)
 end subroutine RTI_init
 
 subroutine Blasius_init(q0)
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(ndmax,jmax,kmax,lmax) :: q0

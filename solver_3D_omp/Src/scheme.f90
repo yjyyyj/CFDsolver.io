@@ -2,7 +2,7 @@ module scheme_mod
     !******************************************************************
     !*     The scheme with important state of Solver                  *
     !******************************************************************
-    use param
+    use param_mod
     implicit none
     !
     type scheme
@@ -15,47 +15,38 @@ module scheme_mod
         contains
         procedure :: select_flux
         procedure :: select_visflux
-        procedure :: select_muscl
+        procedure :: select_faceQ
         procedure :: select_step
         procedure :: select_outf
-        ! procedure :: set_q
     end type scheme
 
 contains
-    ! fluxの実装部
-    ! type(scheme) function init_scheme(self, q, q0, qc)
-    !     class(scheme) :: self
-    !     double precision :: q, q0, qc
-            
-    ! end function init_scheme
-
-    ! subroutine set_q(self,q)
-    !     class(scheme) self
-    !     double precision,dimension(ndmax,0:(jmax+1),0:(kmax+1)):: q
-    ! end subroutine set_q
-
     subroutine select_flux(self,irhs)
         class(scheme) self
         integer,intent(in) :: irhs
 
         select case(irhs)
         case(1)
-            write(*,*) "DIVERGENCE"
+            write(*,*) "flux      : DIVERGENCE"
             self%calc_flux => flux_div
         case(2)
-            write(*,*) "UPWIND"
+            write(*,*) "flux      : UPWIND"
             self%calc_flux => flux_upwind
         case(3)
-            write(*,*) "SLAU"
+            write(*,*) "flux      : SLAU"
             self%calc_flux => flux_slau
         case(4)
-            write(*,*) "KEEP"
+            write(*,*) "flux      : KEEP"
             self%calc_flux => flux_KEEP
-            ! self%calc_flux => flux_KEEP_PE
         case(5)
-            write(*,*) "Proposed"
+            write(*,*) "flux      : KEEP_PE"
+            self%calc_flux => flux_KEEP_PE
+        case(6)
+            write(*,*) "flux      : Proposed(Split)"
             self%calc_flux => flux_proposed
-            ! self%calc_flux => flux_prodiv
+        case(7)
+            write(*,*) "flux      : Proposed(Div)"
+            self%calc_flux => flux_prodiv
         case default
             write(*,*) "[Error] invalid number of flux in main.f90: ",irhs
             stop
@@ -68,13 +59,14 @@ contains
 
         select case(vflag)
         case(0)
-            write(*,*) "Euler"
+            write(*,*) "viscus    : Euler"
             self%calc_visflux => visflux_none
         case(1)
-            write(*,*) "LAD"
-            self%calc_visflux => visflux_LAD
+            write(*,*) "viscus    : Numerical diffusion"
+            self%calc_visflux => visflux_numerical
+            
         case(2)
-            write(*,*) "DNS"
+            write(*,*) "viscus    : DNS"
             self%calc_visflux => visflux_dns
         case default
             write(*,*) "[Error] invalid number of visflux in main.f90: ",vflag
@@ -82,23 +74,23 @@ contains
         end select
     end subroutine select_visflux
 
-    subroutine select_muscl(self,acc)
+    subroutine select_faceQ(self,faceAcc)
         class(scheme) self
-        integer,intent(in) :: acc
+        integer,intent(in) :: faceAcc
         external firstOrderQ, muscl_va
 
-        select case(acc)
+        select case(faceAcc)
         case(0)
-            write(*,*) "1stOrder"
+            write(*,*) "useMuscl  : 1stOrder"
             self%calc_faceQ => firstOrderQ
         case(1)
-            write(*,*) "MUSCL(2nd)"
+            write(*,*) "useMuscl  : MUSCL(2nd)"
             self%calc_faceQ => muscl_va
         case default
-            write(*,*) "[Error] invalid number of muscl in main.f90: ",acc
+            write(*,*) "[Error] invalid number of muscl in main.f90: ",faceAcc
             stop
         end select
-    end subroutine select_muscl
+    end subroutine select_faceQ
     
     subroutine select_outf(self,dim_outf)
         class(scheme) self
@@ -107,15 +99,15 @@ contains
 
         select case(dim_outf)
         case(1)
-            write(*,*) "1D outflow"
+            write(*,*) "outfield  : 1D outflow"
             self%calc_outf => outf_1d
             self%calc_outf_init => outf_1d_init
         case(2)
-            write(*,*) "2D outflow"
+            write(*,*) "outfield  : 2D outflow"
             self%calc_outf => outf_2d
             self%calc_outf_init => outf_2d_init
         case(3)
-            write(*,*) "3D outflow"
+            write(*,*) "outfield  : 3D outflow"
             self%calc_outf => outf_3d
             self%calc_outf_init => outf_3d_init
         case default
@@ -131,11 +123,14 @@ contains
 
         select case(ilhs)
         case(1)
-            write(*,*) "1stEuler"
+            write(*,*) "timeStep  : 1stEuler"
             self%calc_step => step_euler
         case(2)
-            write(*,*) "RK4"
+            write(*,*) "timeStep  : RK4"
             self%calc_step => step_RK4
+        case(3)
+            write(*,*) "timeStep  : TVDRK3"
+            self%calc_step => step_TVDRK3
         case default
             write(*,*) "[Error] invalid number of LHS in main.f90: ",ilhs
             stop

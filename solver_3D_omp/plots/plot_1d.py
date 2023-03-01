@@ -5,10 +5,7 @@ import matplotlib.pyplot as plt
 range_min=-1e-2
 range_max= 1e-3
 fname0 = "output_000000.dat"
-fname1 = "output_000000.dat"
-# fname1 = "output_000100.dat"
-fname1 = "output_010000.dat"
-# fname1 = "output_500000.dat"
+fname1 = "output_001000.dat"
 
 # global settings
 plt.rcParams['xtick.direction'] = 'in'#x軸の目盛線が内向き('in')か外向き('out')か双方向か('inout')
@@ -17,7 +14,7 @@ plt.rcParams['xtick.major.width'] = 1.0 #x軸主目盛り線の線幅
 plt.rcParams['ytick.major.width'] = 1.0 #y軸主目盛り線の線幅
 plt.rcParams['font.size'] = 22 #フォントの大きさ
 plt.rcParams['axes.linewidth'] = 1.0 # 軸の線幅edge linewidth。囲みの太さ
-plt.rcParams['text.usetex'] = True # Latex text
+# plt.rcParams['text.usetex'] = True # Latex text
 plt.rcParams["axes.formatter.use_mathtext"]=True
 
 fig = plt.figure()
@@ -59,27 +56,17 @@ plt.grid(False)
 nmax = x1.shape[0]
 
 plt.xlabel(r'$x$',fontsize=28,y=0)
-# plt.xlabel(r'$t$',fontsize=28,y=0)
 plt.ylabel(r"$\rho Y_i,\: u, p, T$",fontsize=28)
-# plt.ylabel(r"$\sum[(E_{(t)}-E_{(t=0)})/E_{(t=0)}]$",fontsize=28)
 
-
-# plt.plot(x1[:nmax], q0_1[:nmax], "o", color="gray"       , markevery=20, markersize="10", markerfacecolor="white", zorder=-1)
 plt.plot(x0_1[:nmax], q0_2[:nmax], "o", color="red"        , markevery=20, markersize="10", markerfacecolor="white", zorder=-2)
 plt.plot(x0_1[:nmax], q0_5[:nmax], "o", color="green"      , markevery=20, markersize="10", markerfacecolor="white", zorder=-5)
 plt.plot(x0_1[:nmax], q0_6[:nmax], "o", color="blue"       , markevery=20, markersize="10", markerfacecolor="white", zorder=-6)
 plt.plot(x0_1[:nmax], q0_7[:nmax], "o", color="orange"     , markevery=20, markersize="10", markerfacecolor="white", zorder=-7)
-plt.plot(x0_1[:nmax], q0_8[:nmax], "o", color="purple"     , markevery=20, markersize="10", markerfacecolor="white", zorder=-8)
 
-# plt.plot(x1[:nmax], q1[:nmax], linewidth=1.2, color="gray"         , linestyle="solid",zorder=1)
 plt.plot(x1[:nmax], q2[:nmax], linewidth=1.2, color="red"          , linestyle="solid",zorder=2)
-# plt.plot(x1[:nmax], q3[:nmax], linewidth=1.2, color="blue", linestyle="solid",zorder=3)
-# plt.plot(x1[:nmax], q4[:nmax], linewidth=1.2, color="orange", linestyle="solid",zorder=4)
 plt.plot(x1[:nmax], q5[:nmax], linewidth=1.2, color="green"        , linestyle="solid",zorder=5)
 plt.plot(x1[:nmax], q6[:nmax], linewidth=1.2, color="blue"         , linestyle="solid",zorder=6)
 plt.plot(x1[:nmax], q7[:nmax], linewidth=1.2, color="orange"       , linestyle="solid",zorder=7)
-plt.plot(x1[:nmax], q8[:nmax], linewidth=1.2, color="purple"       , linestyle="solid",zorder=8)
-# plt.plot(x1[:nmax], q9[:nmax], linewidth=1.2, color="orange", linestyle="solid",zorder=9)
 
 
 # plt.show()

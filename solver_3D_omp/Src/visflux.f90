@@ -1,8 +1,8 @@
-subroutine visflux_LAD(ql, qr, vf, fmu)
+subroutine visflux_numerical(ql, qr, vf, fmu)
   !**********************************************************************
   !*     caluculate numerical viscuss term                              *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: vf
@@ -110,13 +110,13 @@ subroutine visflux_LAD(ql, qr, vf, fmu)
   end do
 
   return
-end subroutine visflux_LAD
+end subroutine visflux_numerical
 
 subroutine visflux_dns(ql, qr, vf, fmu)
   !**********************************************************************
-  !*     caluculate physical viscuss term                               *
+  !*     caluculate physical viscuss term  (in progress)                *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: vf
@@ -566,7 +566,7 @@ subroutine calc_viscoefs(q, fmu)
   !**********************************************************************
   !*     caluculate the viscuss coefficients                            *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l
   double precision, dimension(0:(jmax+1),0:(kmax+1),0:(lmax+1)) :: fmu

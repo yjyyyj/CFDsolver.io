@@ -2,7 +2,7 @@ subroutine flux_div(ql, qr, f)
   !**********************************************************************
   !*     caluculate invicid flux in divergence form                     *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f
@@ -72,7 +72,7 @@ subroutine flux_upwind(ql, qr, f)
   !**********************************************************************
   !*     caluculate invicid flux in 1st Rusanov scheme                  *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f
@@ -146,7 +146,7 @@ subroutine flux_roe(ql, qr, f)
   !**********************************************************************
   !*     caluculate invicid flux in 1st Roe scheme (insufficient)       *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f
@@ -256,7 +256,7 @@ subroutine flux_slau(ql, qr, f)
   !**********************************************************************
   !*     caluculate invicid flux in 1st SLAU scheme                     *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f
@@ -399,7 +399,7 @@ subroutine flux_KEEP(ql, qr, f)
   !**********************************************************************
   !*     caluculate invicid flux in KEEP scheme                         *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f
@@ -483,7 +483,7 @@ subroutine flux_KEEP_PE(ql, qr, f)
   !**********************************************************************
   !*     caluculate invicid flux in KEEPpe scheme                       *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f
@@ -567,7 +567,7 @@ subroutine flux_proposed(ql, qr, f)
   !**********************************************************************
   !*   caluculate invicid flux in Fujiwara proposed scheme (split form) *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f
@@ -633,9 +633,9 @@ subroutine flux_proposed(ql, qr, f)
           pbar = ( p1*u2(n) + u1(n)*p2 )*0.5d0
       
           f(1,j,k,l,n) = 0.d0
-          f(2,j,k,l,n) = mubar(1) + pibar*dble(dl(1))
-          f(3,j,k,l,n) = mubar(2) + pibar*dble(dl(2))
-          f(4,j,k,l,n) = mubar(3) + pibar*dble(dl(3))
+          f(2,j,k,l,n) = mubar(1) + pibar*dl(1)
+          f(3,j,k,l,n) = mubar(2) + pibar*dl(2)
+          f(4,j,k,l,n) = mubar(3) + pibar*dl(3)
           f(5,j,k,l,n) = kbar + ibar + pbar
           f(6:ndmax,j,k,l,n) = cybar(:)
         end do
@@ -651,7 +651,7 @@ subroutine flux_prodiv(ql, qr, f)
   !**********************************************************************
   !*   caluculate invicid flux in Fujiwara proposed scheme (div form)   *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision, dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f
@@ -706,9 +706,9 @@ subroutine flux_prodiv(ql, qr, f)
           e2 = p2*g2
           
           f(1,j,k,l,n) = 0.d0
-          f(2,j,k,l,n) = 0.5d0*( c1*r1*u1(1)*u1(n) + c2*r2*u2(1)*u2(n) + (p1 + p2)*dble(dl(1)) )
-          f(3,j,k,l,n) = 0.5d0*( c1*r1*u1(2)*u1(n) + c2*r2*u2(2)*u2(n) + (p1 + p2)*dble(dl(2)) )
-          f(4,j,k,l,n) = 0.5d0*( c1*r1*u1(3)*u1(n) + c2*r2*u2(3)*u2(n) + (p1 + p2)*dble(dl(3)) )
+          f(2,j,k,l,n) = 0.5d0*( c1*r1*u1(1)*u1(n) + c2*r2*u2(1)*u2(n) + (p1 + p2)*dl(1) )
+          f(3,j,k,l,n) = 0.5d0*( c1*r1*u1(2)*u1(n) + c2*r2*u2(2)*u2(n) + (p1 + p2)*dl(2) )
+          f(4,j,k,l,n) = 0.5d0*( c1*r1*u1(3)*u1(n) + c2*r2*u2(3)*u2(n) + (p1 + p2)*dl(3) )
           f(5,j,k,l,n) = 0.5d0*( (k1+e1+p1)*u1(n) + (k2+e2+p2)*u2(n) )
           f(6:ndmax,j,k,l,n) = 0.5d0*( c1*ry1(:)*u1(n) + c2*ry2(:)*u2(n) )
         end do

@@ -1,8 +1,8 @@
 subroutine firstOrderQ(q, ql, qr)
   !**********************************************************************
-  !*     caluculate Q-face value with 1st-order                         *
+  !*   caluculate Q-face value with 1st-order extrapolation (default)   *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n
   double precision,dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1)) :: q
@@ -25,9 +25,9 @@ end subroutine firstOrderQ
 
 subroutine muscl_va(q, ql, qr)
   !**********************************************************************
-  !*     caluculate Q-face value with MUSCL                             *
+  !* caluculate Q-face interpolation with MUSCL (when only use Upwind)  *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j,k,l,n,nd
   double precision dkp, dkpp1, dkpm1
@@ -38,11 +38,10 @@ subroutine muscl_va(q, ql, qr)
   integer,dimension(ndim) :: dl
 
 
-  ! high order upwind
-  ! dkp = -1.0d0 ! 2nd order upwind
+  !******** high order upwind
   ! dkp = 1.0d0/3.0d0 ! 3rd order upwind
   ! dkp = 1.0d0  ! 2nd order central
-  dkp = -1d0
+  dkp = -1.0d0 ! 2nd order upwind
   eps = 1.0d-12
 
   do nd=1,ndim

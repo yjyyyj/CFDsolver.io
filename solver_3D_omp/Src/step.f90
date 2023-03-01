@@ -2,7 +2,7 @@ subroutine step_euler(q, qc, myscheme)
   !**********************************************************************
   !*     caluculate right-hand-side with 1st-explicit-euler             *
   !**********************************************************************
-  use param
+  use param_mod
   use scheme_mod
   implicit none
   type(scheme) :: myscheme
@@ -13,7 +13,7 @@ subroutine step_euler(q, qc, myscheme)
   double precision,dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f       ! flux
   double precision,dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: vf       ! flux
   double precision,dimension(ndmax,jmax,kmax,lmax) :: s       ! rhs 
-  double precision,dimension(ndmax,jmax,kmax,lmax) :: qc      ! renew q
+  double precision,dimension(ndmax,jmax,kmax,lmax) :: qc      ! conservative q
   double precision,dimension(0:(jmax+1),0:(kmax+1),0:(lmax+1)) :: fmu           ! viscous coefficient
   double precision :: ruvw2
 
@@ -87,7 +87,7 @@ subroutine step_RK4(q, qc, myscheme)
   !**********************************************************************
   !*     caluculate right-hand-side with RK4                            *
   !**********************************************************************
-  use param
+  use param_mod
   use scheme_mod
   implicit none
   type(scheme) :: myscheme
@@ -98,9 +98,9 @@ subroutine step_RK4(q, qc, myscheme)
   double precision,dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f       ! flux
   double precision,dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: vf       ! viscus flux
   double precision,dimension(ndmax,jmax,kmax,lmax) :: s       ! rhs 
-  double precision,dimension(ndmax,jmax,kmax,lmax) :: qc      ! renew q
-  double precision,dimension(ndmax,jmax,kmax,lmax) :: qcold1       ! primitive q
-  double precision,dimension(ndmax,jmax,kmax,lmax) :: qcold2       ! primitive q
+  double precision,dimension(ndmax,jmax,kmax,lmax) :: qc      ! conservative q
+  double precision,dimension(ndmax,jmax,kmax,lmax) :: qcold1       ! renew q
+  double precision,dimension(ndmax,jmax,kmax,lmax) :: qcold2       ! renew q
 
   double precision,parameter :: rc1(1:4) = (/1.0d0,1.0d0,1.0d0,1.0d0/)
   double precision,parameter :: rc2(1:4) = (/0.0d0,0.0d0,0.0d0,1.0d0/6.0d0/)
@@ -189,3 +189,105 @@ subroutine step_RK4(q, qc, myscheme)
   
   return
 end subroutine step_RK4
+
+subroutine step_TVDRK3(q, qc, myscheme)
+  !**********************************************************************
+  !*     caluculate right-hand-side with TVDRK3                         *
+  !**********************************************************************
+  use param_mod
+  use scheme_mod
+  implicit none
+  type(scheme) :: myscheme
+
+  integer j,k,l, nn
+  double precision,dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1)) :: q       ! primitive q
+  double precision,dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1),ndim) :: ql,qr   ! primitive dq
+  double precision,dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: f       ! flux
+  double precision,dimension(ndmax,0:jmax,0:kmax,0:lmax,ndim) :: vf       ! viscus flux
+  double precision,dimension(ndmax,jmax,kmax,lmax) :: s       ! rhs 
+  double precision,dimension(ndmax,jmax,kmax,lmax) :: qc      ! conservative q
+  double precision,dimension(ndmax,jmax,kmax,lmax) :: qcold       ! renew q
+
+  double precision,parameter :: rc1(1:3) = (/1.0d0,3.d0/4.d0,1.d0/3.d0/)
+  double precision,parameter :: rc2(1:3) = (/0.0d0,1.d0/4.d0,2.d0/3.d0/)
+  double precision,parameter :: rc3(1:3) = (/1.0d0,1.0d0/4.0d0,2.d0/3.d0/)
+  double precision,dimension(0:(jmax+1),0:(kmax+1),0:(lmax+1)) :: fmu           ! viscous coefficient
+  double precision :: ruvw2
+
+  qcold = qc
+
+  do nn = 1,3
+
+    f  = 0.0d0
+    vf = 0.0d0
+    ql = 0.0d0
+    qr = 0.0d0
+    s  = 0.0d0
+    fmu = 0.0d0
+    resid = 0.0d0
+
+
+    call calc_viscoefs(q, fmu)
+    call bc(q,fmu)
+    call myscheme%calc_faceQ(q, ql, qr)
+    call myscheme%calc_flux(ql, qr, f)
+    call myscheme%calc_visflux(ql, qr, vf, fmu)
+
+    !******** time propagation *****************************************************
+
+    !$omp parallel do shared(q,qc,qcold,f,vf,s,dt,dx)
+    do l=1,lmax
+      do k=1,kmax
+        do j=1,jmax
+          s(1:ndmax,j,k,l)  = -dt/dx(1) *(  f(1:ndmax,j,k,l,1) - f(1:ndmax,j-1,k,l,1) )   &
+                            & -dt/dx(2) *(  f(1:ndmax,j,k,l,2) - f(1:ndmax,j,k-1,l,2) )   &
+                            & -dt/dx(3) *(  f(1:ndmax,j,k,l,3) - f(1:ndmax,j,k,l-1,3) )   & ! f(j): ~f(j+1/2)
+                            & +dt/dx(1) *(  vf(1:ndmax,j,k,l,1) - vf(1:ndmax,j-1,k,l,1) )   & 
+                            & +dt/dx(2) *(  vf(1:ndmax,j,k,l,2) - vf(1:ndmax,j,k-1,l,2) )   & 
+                            & +dt/dx(3) *(  vf(1:ndmax,j,k,l,3) - vf(1:ndmax,j,k,l-1,3) )  
+
+          ! TVDRK3 *************************************************************
+          qc(:,j,k,l) = rc1(nn)* qcold(:,j,k,l)    &
+          &           + rc2(nn)*    qc(:,j,k,l)    &
+          &           + rc3(nn)*     s(:,j,k,l)
+          ! ******************************************************************
+
+          ! renew primitive q *********************************
+          qc(1,j,k,l) = sum(qc(6:ndmax,j,k,l))
+          mw(j,k,l)  = calmw(qc(:,j,k,l))
+          gam(j,k,l) = calgm(qc(:,j,k,l),mw(j,k,l))
+          ruvw2 = qc(2,j,k,l)*qc(2,j,k,l) +qc(3,j,k,l)*qc(3,j,k,l) +qc(4,j,k,l)*qc(4,j,k,l)
+
+
+          q(1,j,k,l) = qc(1,j,k,l) ! rho
+          q(2,j,k,l) = qc(2,j,k,l)/qc(1,j,k,l) ! u
+          q(3,j,k,l) = qc(3,j,k,l)/qc(1,j,k,l) ! v
+          q(4,j,k,l) = qc(4,j,k,l)/qc(1,j,k,l) ! w
+          q(5,j,k,l) = ( qc(5,j,k,l) - 0.5d0*ruvw2/qc(1,j,k,l) )/gam(j,k,l) ! p
+          q(6:ndmax,j,k,l) = qc(6:ndmax,j,k,l) ! rhoy
+
+          !*****************************************************
+        enddo
+      enddo
+    enddo
+
+    !******** calc residual *****************************************************
+
+    !$omp parallel do reduction(+:resid)
+    do l=1,lmax
+      do k=1,kmax
+        do j=1,jmax
+          ! compute l2 residual of rhs 
+          resid(1) = resid(1) + s(1,j,k,l)*s(1,j,k,l) 
+          resid(2) = resid(2) + s(2,j,k,l)*s(2,j,k,l) 
+          resid(3) = resid(3) + s(3,j,k,l)*s(3,j,k,l) 
+          resid(4) = resid(4) + s(4,j,k,l)*s(4,j,k,l) 
+          resid(5) = resid(5) + s(5,j,k,l)*s(5,j,k,l)                       
+          resid(6:ndmax) = resid(6:ndmax) + s(6:ndmax,j,k,l)*s(6:ndmax,j,k,l)
+        enddo
+      enddo
+    enddo
+  end do
+  
+  return
+end subroutine step_TVDRK3

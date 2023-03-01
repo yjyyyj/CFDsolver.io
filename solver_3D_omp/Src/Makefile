@@ -7,7 +7,7 @@ OPT = -O3
 LDFLAGS = -fopenmp
 FFLAGS =-fconvert=little-endian  -frecord-marker=${MARK} ${LDFLAGS} ${OPT}
 
-OBJS = param.o flux.o scheme.o main.o outf.o init.o  bc.o sumdf.o muscl.o step.o visflux.o read_data.o
+OBJS = param.o flux.o scheme.o main.o outf.o init.o  bc.o sumqc.o muscl.o step.o visflux.o read_data.o
 PROGRAM = ../job.out
 
 all:	$(OBJS)

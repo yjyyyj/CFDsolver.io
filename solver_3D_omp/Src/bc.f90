@@ -2,7 +2,7 @@ subroutine bc(q,fmu)
   !**********************************************************************
   !*     set boundary condition                                         *
   !**********************************************************************
-  use param
+  use param_mod
   implicit none
   integer j
   double precision, dimension(ndmax,0:(jmax+1),0:(kmax+1),0:(lmax+1)) :: q

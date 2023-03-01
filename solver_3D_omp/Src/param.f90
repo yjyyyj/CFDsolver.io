@@ -1,4 +1,4 @@
-module param
+module param_mod
   !******************************************************************
   !*     function & parameter module                                *
   !******************************************************************
@@ -35,7 +35,7 @@ module param
   integer :: mconst
   integer :: jmax, kmax, lmax
   integer :: irhs
-  integer :: acc
+  integer :: faceAcc
   integer :: ilhs
   integer :: vflag
   integer :: dim_outf
@@ -85,4 +85,4 @@ module param
     enddo
   end function
 
-end module param
+end module param_mod
