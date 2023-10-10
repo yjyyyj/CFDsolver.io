@@ -123,3 +123,56 @@ int main() {
 }
 
 
+// **********************************************************
+
+#include <iostream>
+#include <vector>
+#include <fstream>
+
+struct Data {
+    int x;
+    int y;
+    uint8_t value;
+};
+
+int main() {
+    std::vector<Data> dataList = {
+        {0, 0, 255},
+        {1, 0, 128},
+        {0, 1, 64},
+        {1, 1, 32}
+    };
+
+    int width = 2;
+    int height = 2;
+
+    // 8ビットグレースケールのバッファを用意
+    uint8_t* image = new uint8_t[width * height];
+    for (const Data& data : dataList) {
+        image[data.y * width + data.x] = data.value;
+    }
+
+    std::ofstream tiffFile("output.tif", std::ios::binary);
+
+    // TIFFヘッダの書き込み
+    uint16_t endian = 0x4949;  // II (リトルエンディアン)
+    tiffFile.write(reinterpret_cast<char*>(&endian), 2);
+    uint16_t magic = 42;
+    tiffFile.write(reinterpret_cast<char*>(&magic), 2);
+    uint32_t ifdOffset = 8;
+    tiffFile.write(reinterpret_cast<char*>(&ifdOffset), 4);
+
+    // IFD (Image File Directory) の書き込み
+    uint16_t numEntries = 4;
+    tiffFile.write(reinterpret_cast<char*>(&numEntries), 2);
+    // さまざまなTIFFタグを書き込む...
+
+    // 画像データの書き込み
+    tiffFile.write(reinterpret_cast<char*>(image), width * height);
+
+    tiffFile.close();
+    delete[] image;
+
+    return 0;
+}
+
